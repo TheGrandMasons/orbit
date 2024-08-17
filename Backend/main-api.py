@@ -38,3 +38,39 @@ def get_db():
             # Checking in Exp, It should be right . we can yeild an error if - else, leave it right now
             if 'exists' in str(e).lower():
                 pass
+
+@app.post('/user-creation/')
+# Query(...) is param input it provides like api.com/path?parameter_name=""
+# You must pass type into it str , int , float = Query(...)
+# Depends are server based enclosed parameters .
+
+def create_user(username : str = Query(...), curs = Depends(get_db)):
+
+        # Execute the insertion with parameterized queries to prevent SQL injection
+        curs = get_db()
+        curs.execute('SELECT * FROM USERS WHERE USERNAME = ?', (username,))
+        # Checking for username if exists . "username" in [fetched data[0] -> indecated for every username]
+        if username in [x[0] for x in curs.fetchall()]:
+            return {
+                'success': False,                        # Success "bool" must be passed in every call.
+                'UFM': 'Sorry, Username Already Exists', # User-Friendly-Message ( can be shown in GUI ).
+                'WFM': 'USERNAME_EXISTS'                 # Used to validation in z3ln's side.
+            }
+        else:
+            curs.execute("""
+                INSERT INTO USERS
+                VALUES (?, ?, ?)
+                """, (
+                    username,
+                    dumps([]),
+                    dumps([{'badge-name':'Visitor', 'rarity':'normal'}])
+                )
+            )
+            curs.connection.commit()  # Commit the transaction
+
+            return {
+                'success': True,
+                'user-info':{},
+                'UFM': '',
+                'WFM': 'USER_CREATED'
+            }
