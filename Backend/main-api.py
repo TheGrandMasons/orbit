@@ -62,7 +62,7 @@ def create_user(username : str = Query(...), curs = Depends(get_db)):
                 VALUES (?, ?, ?)
                 """, (
                     username,
-                    dumps([]),
+                    dumps([]), # dumps() -> used to add json info into sql.
                     dumps([{'badge-name':'Visitor', 'rarity':'normal'}])
                 )
             )
@@ -70,7 +70,30 @@ def create_user(username : str = Query(...), curs = Depends(get_db)):
 
             return {
                 'success': True,
-                'user-info':{},
+                'INSTRUCTIONS': f'Use api/users/{username} to get all user\'s info.',
                 'UFM': '',
                 'WFM': 'USER_CREATED'
             }
+
+@app.get('/users/{username}')
+def get_user(username, curs=Depends(get_db)):
+    curs.execute('SELECT * FROM USERS WHERE USERNAME = ?', (username,))
+    user = curs.fetchone()
+    if user:
+        return {
+            'success': True,
+            'user-info': {
+                "username" : user[0],
+                "visits"   : user[1],  
+                "badges"   : loads(user[2])
+            },
+            'UFM' : '',
+            'WFM' : 'USER_FOUND'
+        }
+    else:
+        return {
+            'success': False,
+            'UFM' : 'The user you are searching for does not exists .',
+            'WFM' : 'USER_NOT_FOUND'
+        }
+
