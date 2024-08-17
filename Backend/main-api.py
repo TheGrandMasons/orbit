@@ -56,7 +56,7 @@ def create_user(username : str = Query(...), curs = Depends(get_db)):
                 'UFM': 'Sorry, Username Already Exists', # User-Friendly-Message ( can be shown in GUI ).
                 'WFM': 'USERNAME_EXISTS'                 # Used to validation in z3ln's side.
             }
-        elif " " in username or any('!', '@', '#', '$', '%', '^', '&', '*', '(', ')' in username):
+        elif " " in username or any(char in username for char in '!@#$%^&*()'):
             return {
                 'success': False,                        
                 'UFM': 'Sorry, Username must be lowercase , use _ instead of spaces and don\'t use spechial chars.', 
