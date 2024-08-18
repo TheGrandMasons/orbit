@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Form, Query, Request
 from sqlite3 import *
 from json import dumps, loads
-
+import random
 app = FastAPI()
 
 # /{path-name}  -> is the API path: 192.168.1.7:8000/{path}
@@ -158,6 +158,7 @@ def AddVisit(username : str = Query(...), orr_id : str = Query(...), curs : Curs
                         'badge-description' : 'You Visited more than 10 models, You are an actual visitor !'}]),
                 str( username )
                 )) 
+            curs.connection.commit()
         else:
             additions['alert'] = 'BADGE_EXISTS'
 
@@ -183,6 +184,39 @@ def AddVisit(username : str = Query(...), orr_id : str = Query(...), curs : Curs
 
 @app.post('/GiveBadge/')
 def GiveCustomBadge(username : str = Query(...), badgeName : str = Query(...),
-                    badgeRariety : str = Query(...), badgeDescription : str = Query(...)):
-    pass
+                    badgeRariety : str = Query(...), badgeDescription : str = Query(...), curs : Cursor = Depends(GetDb)):
+    
+    curs.execute('SELECT * FROM USERS WHERE USERNAME = ? ', (username,))
+    userInfo = curs.fetchone() 
 
+    # fetchone() returns None if nothing in table with Identicator
+
+    if not userInfo :
+        return {
+            'success': False,
+            'UFM': 'Your login sssion might be ended, please push a bug in our repo TheGrandMasons/orbit',
+            'WFM': 'USER_NOT_FOUND'
+            }
+    
+    # Check if badge exists or not .
+    for badge in loads(userInfo[2]):
+        if badge['badge-name'] == badgeName:
+            return {
+                'succss' : False,
+                'UFM' : 'You have this badge already',
+                "WFM": 'BADGE_EXISTS'
+            }
+
+    curs.execute('UPDATE USERS SET BADGES = ? WHERE USERNAME = ?', (
+                    {'badge-name' : badgeName,
+                    'badge-rariety' : badgeRariety,
+                    'badge-description' : badgeDescription},
+                    str( username )
+        )) 
+    curs.connection.commit()
+    return {
+        'success' : True,
+        'EaserEgg' : random.randint(0000,1090), # It has a huge task to do let us see it later.
+        'UFM' : 'I think Z3ln made somthing spechial for you',
+        'WFM' : 'BADGE_ADDED'
+    }
