@@ -2,104 +2,98 @@ from fastapi import FastAPI, HTTPException, Depends, Form, Query, Request
 from sqlite3 import *
 from json import dumps, loads
 
-
 app = FastAPI()
 
-
-# app. (get or post) is handling the type of API's request.
-# /{path-name}  - > is the adx api bath : 192.168.1.7:8000/{path}
-@app.get('/get-orreries')
-def OrerriesOutput():
-
+# /{path-name}  -> is the API path: 192.168.1.7:8000/{path}
+@app.get('/GetOrreries')
+def OrreriesOutput():
     # Here we will get a new orrery data
-    # Data will be returned as a dict from the database. 
-
+    # Data will be returned as a dict from the database.
     orreries = []
     return orreries
 
-# get_db used to get a cursor in actual thread of api, please use it in any execution
-def get_db():
+# GetDb is used to get a cursor in the actual thread of the API, please use it in any execution
+def GetDb():
     # Init connection
     conn = connect('database.db')
     try:
         return conn.cursor()
     finally:
         try:
-            # This is our static usr info 
+            # This is our static user info
             conn.cursor().execute("""
-                        CREATE TABLE USERS (
-                            USERNAME TEXT, 
-                            VISITS   TEXT,
-                            BADGES   TEXT
-                        )
-                        """)      
+                CREATE TABLE USERS (
+                    USERNAME TEXT, 
+                    VISITS   TEXT,
+                    BADGES   TEXT
+                )
+            """)
             conn.close()
-        except Exception as e :
-            # Checking in Exp, It should be right . we can yeild an error if - else, leave it right now
+        except Exception as e:
+            # Checking for exceptions. If 'exists' is in the error message, it indicates the table already exists.
             if 'exists' in str(e).lower():
                 pass
 
-@app.post('/user-creation/')
-# Query(...) is param input it provides like api.com/path?parameter_name=""
-# You must pass type into it str , int , float = Query(...)
-# Depends are server based enclosed parameters .
+@app.post('/UserCreation/')
+# Query(...) is a parameter input; it provides like api.com/path?parameter_name=""
+# You must pass type into it: str, int, float = Query(...)
+# Depends are server-based enclosed parameters.
+def CreateUser(username: str = Query(...), curs = Depends(GetDb)):
+    # Execute the insertion with parameterized queries to prevent SQL injection
+    curs.execute('SELECT * FROM USERS WHERE USERNAME = ?', (username,))
+    # Checking if username exists. "username" in [fetched data[0] -> indicates each username]
+    if username in [x[0] for x in curs.fetchall()]:
+        return {
+            'success': False,                        # Success "bool" must be passed in every call.
+            'ufm': 'Sorry, Username Already Exists', # User-Friendly-Message (can be shown in GUI).
+            'wfm': 'USERNAME_EXISTS'                 # Used for validation in z3ln's side.
+        }
+    elif " " in username or any(char in username for char in '!@#$%^&*()'):
+        return {
+            'success': False,
+            'ufm': 'Sorry, Username must be lowercase, use _ instead of spaces and don\'t use special chars.', 
+            'wfm': 'WRONG_USERNAME_FORMAT'
+        }
+    else:
+        curs.execute("""
+            INSERT INTO USERS
+            VALUES (?, ?, ?)
+        """, (
+            username,
+            dumps([]),  # dumps() -> used to add JSON info into SQL.
+            dumps([{'badgeName':'Visitor', 'rarity':'normal'}])  # LowerCamelCase for keys
+        ))
+        curs.connection.commit()  # Commit the transaction
 
-def create_user(username : str = Query(...), curs = Depends(get_db)):
+        return {
+            'success': True,
+            'instructions': f'Use api/users/{username} to get all user\'s info.',  # LowerCamelCase for instructions
+            'ufm': '',
+            'wfm': 'USER_CREATED'
+        }
 
-        # Execute the insertion with parameterized queries to prevent SQL injection
-        curs = get_db()
-        curs.execute('SELECT * FROM USERS WHERE USERNAME = ?', (username,))
-        # Checking for username if exists . "username" in [fetched data[0] -> indecated for every username]
-        if username in [x[0] for x in curs.fetchall()]:
-            return {
-                'success': False,                        # Success "bool" must be passed in every call.
-                'UFM': 'Sorry, Username Already Exists', # User-Friendly-Message ( can be shown in GUI ).
-                'WFM': 'USERNAME_EXISTS'                 # Used to validation in z3ln's side.
-            }
-        elif " " in username or any(char in username for char in '!@#$%^&*()'):
-            return {
-                'success': False,                        
-                'UFM': 'Sorry, Username must be lowercase , use _ instead of spaces and don\'t use spechial chars.', 
-                'WFM': 'WRONG_USERNAME_FORMAT'                 
-            }
-        else:
-            curs.execute("""
-                INSERT INTO USERS
-                VALUES (?, ?, ?)
-                """, (
-                    username,
-                    dumps([]), # dumps() -> used to add json info into sql.
-                    dumps([{'badge-name':'Visitor', 'rarity':'normal'}])
-                )
-            )
-            curs.connection.commit()  # Commit the transaction
-
-            return {
-                'success': True,
-                'INSTRUCTIONS': f'Use api/users/{username} to get all user\'s info.',
-                'UFM': '',
-                'WFM': 'USER_CREATED'
-            }
-
-@app.get('/users/{username}')
-def get_user(username, curs=Depends(get_db)):
+@app.get('/Users/{username}')
+def GetUser(username, curs=Depends(GetDb)):
     curs.execute('SELECT * FROM USERS WHERE USERNAME = ?', (username,))
     user = curs.fetchone()
     if user:
         return {
             'success': True,
-            'user-info': {
-                "username" : user[0],
-                "visits"   : user[1],  
-                "badges"   : loads(user[2])
+            'userInfo': {  # LowerCamelCase for user-info keys
+                "username": user[0],
+                "visits": user[1],
+                "badges": loads(user[2])
             },
-            'UFM' : '',
-            'WFM' : 'USER_FOUND'
+            'ufm': '',
+            'wfm': 'USER_FOUND'
         }
     else:
         return {
             'success': False,
-            'UFM' : 'The user you are searching for does not exists .',
-            'WFM' : 'USER_NOT_FOUND'
+            'ufm': 'The user you are searching for does not exist.',
+            'wfm': 'USER_NOT_FOUND'
         }
 
+@app.post('/AddVisit/')
+def AddVisit():
+    pass
