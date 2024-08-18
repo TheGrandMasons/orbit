@@ -113,36 +113,53 @@ def GetUser(username, curs=Depends(GetDb)):
 # We will use this api path to add a visit into orrery model
 # I've added curs : Cursor to highlight every func
 
-#################################
-# Can you clean badges system ? #
-#################################
 
 @app.post('/AddVisit/')
 def AddVisit(username : str = Query(...), orr_id : str = Query(...), curs : Cursor = Depends(GetDb)):
+    
+    curs.execute('SELECT * FROM USERS WHERE USERNAME = ?', (username,))
+    userInfo = curs.fetchone()
+
+
+    # checks for user existance ..
+    if not userInfo:
+        return {
+            'success': False,
+            'UFM': 'Your login sssion might be ended, please push a bug in our repo TheGrandMasons/orbit',
+            'WFM': 'USER_NOT_FOUND'
+            } 
+    
     curs.execute('SELECT * FROM MODELS WHERE ID = ?', (orr_id,))
 
     # loded the set .
-    visitsSet = loads(curs.fetchone())
+    visitsSet = loads(curs.fetchone()[3])
     # adding / editing visits number {"username" : i++}
-    visitsSet[username] += 1 if visitsSet[username] > 0 else 1
+    # This snippet edited to be more efficient ..
+    visitsSet[username] = visitsSet.get(username, 0) + 1
 
     curs.execute('UPDATE MODELS SET VISITS = ? WHERE ID = ?',(
         dumps(visitsSet),
         orr_id
     ))
 
-    curs.execute('SELECT * FROM USERS WHERE USERNAME = ?', (username,))
-    userInfo = curs.fetchone()
+
 
     # Increasing visits number . 
     newVisitsNumber =  int( userInfo[1] ) + 1 
+
+    additions = {}
+
+    # Badges System.
     if newVisitsNumber > 9:
-        curs.execute('UPDATE USERS SET BADGES = ? WHERE USERNAME = ?', (
-            dumps([{'badge-name' : 'Visitor !',
-                    'badge-rariety' : 'silver',
-                    'badge-description' : 'You Visited more than 10 models, You are an actual visitor !'}]),
-            str( username )
-            ))
+        if len(userInfo[2]) == 0:
+            curs.execute('UPDATE USERS SET BADGES = ? WHERE USERNAME = ?', (
+                dumps([{'badge-name' : 'Visitor !',
+                        'badge-rariety' : 'silver',
+                        'badge-description' : 'You Visited more than 10 models, You are an actual visitor !'}]),
+                str( username )
+                )) 
+        else:
+            additions['alert'] = 'BADGE_EXISTS'
 
     curs.execute('UPDATE USERS SET VISITS = ? WHERE USERNAME = ?', (
         str( newVisitsNumber ),
@@ -150,7 +167,6 @@ def AddVisit(username : str = Query(...), orr_id : str = Query(...), curs : Curs
         ))
     curs.connection.commit()
 
-    additions = {}
     if newVisitsNumber > 9 :
         additions['bages-added'] = {'badge-name' : 'Visitor !',
                     'badge-rariety' : 'silver',
@@ -165,5 +181,8 @@ def AddVisit(username : str = Query(...), orr_id : str = Query(...), curs : Curs
         'WFM' : 'VISIT_ADDED'
     }
 
-
+@app.post('/GiveBadge/')
+def GiveCustomBadge(username : str = Query(...), badgeName : str = Query(...),
+                    badgeRariety : str = Query(...), badgeDescription : str = Query(...)):
+    pass
 
