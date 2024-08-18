@@ -28,6 +28,22 @@ def GetDb():
                     BADGES   TEXT
                 )
             """)
+
+            # Here is Model info . let all in TEXT.
+            # ID for indenticate 
+            # INFO is json.dumps({"info-key":"info-desc"}) data . will be json serialized in DB
+            # To deserialize dumped data just use json.load()
+            # Visits is a set of usernames : times EX, {'adelaziz' : 3}, {'seif' : 1}
+            # Leave STATS alone RN , we will add it later .
+
+            conn.cursor().execute("""
+                CREATE TABLE MODELS (
+                    ID       TEXT, 
+                    INFO     TEXT,
+                    VISITS   TEXT,
+                    STATS    TEXT
+                )
+            """)
             conn.close()
         except Exception as e:
             # Checking for exceptions. If 'exists' is in the error message, it indicates the table already exists.
@@ -94,6 +110,7 @@ def GetUser(username, curs=Depends(GetDb)):
             'wfm': 'USER_NOT_FOUND'
         }
 
+# We will use this api path to add a visit into orrery model
 @app.post('/AddVisit/')
 def AddVisit():
     pass
