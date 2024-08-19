@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, Form, Query, Request
 from sqlite3 import *
 from json import dumps, loads
 import random
+import APIsControllers
 app = FastAPI()
 
 # /{path-name}  -> is the API path: 192.168.1.7:8000/{path}
@@ -61,7 +62,7 @@ def CreateUser(username: str = Query(...), curs = Depends(GetDb)):
     if username in [x[0] for x in curs.fetchall()]:
         return {
             'success': False,                        # Success "bool" must be passed in every call.
-            'UFM': 'Sorry, Username Already Exists', # User-Friendly-Message (can be shown in GUI).
+            'UFM': random.choice(APIsControllers.UFMs['USERNAME_EXISTS']), # User-Friendly-Message (can be shown in GUI).
             'WFM': 'USERNAME_EXISTS'                 # Used for validation in z3ln's side.
         }
     elif " " in username or any(char in username for char in '!@#$%^&*()'):
