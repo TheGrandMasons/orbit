@@ -13,7 +13,7 @@ def GiveRndUsername():
    namesPrefix = ['astronut', 'spacevisitor', 'explorer', 'anonymouscurious',
                   'curiouscat', 'algorive', 'persudec', 'dsudusu', 'kitoooo']
    namesVox    = random.randint(00, 99)
-   return namesPrefix + namesVox
+   return random.choice(namesPrefix) + str(namesVox)
 
 
 # UFM will be saved with key of WFM - Website Friendly Message . {'BADGE ADDED' : [a list of messages !]}
@@ -34,6 +34,6 @@ UFMs = {
                         "Spaceships don't take complex names. The love no spaces, no spechial chars names"
    ],
    'USERNAME_EXISTS' : [
-                        f"There is a spaceship got your name, {GiveRndUsername()} is available."
+                        
    ]
 }

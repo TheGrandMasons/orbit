@@ -62,13 +62,13 @@ def CreateUser(username: str = Query(...), curs = Depends(GetDb)):
     if username in [x[0] for x in curs.fetchall()]:
         return {
             'success': False,                        # Success "bool" must be passed in every call.
-            'UFM': random.choice(APIsControllers.UFMs['USERNAME_EXISTS']), # User-Friendly-Message (can be shown in GUI).
+            'UFM': f"There is a spaceship got your name, {APIsControllers.GiveRndUsername()} is available.", # User-Friendly-Message (can be shown in GUI).
             'WFM': 'USERNAME_EXISTS'                 # Used for validation in z3ln's side.
         }
     elif " " in username or any(char in username for char in '!@#$%^&*()'):
         return {
             'success': False,
-            'UFM': 'Sorry, Username must be lowercase, use _ instead of spaces and don\'t use special chars.', 
+            'UFM': random.choice(APIsControllers.UFMs['WRONG_USERNAME_FORMAT']), 
             'WFM': 'WRONG_USERNAME_FORMAT'
         }
     else:
