@@ -3,6 +3,7 @@ from sqlite3 import *
 from json import dumps, loads
 import random
 import APIsControllers
+from APIsBlocks import Blocks
 app = FastAPI()
 
 # /{path-name}  -> is the API path: 192.168.1.7:8000/{path}
@@ -78,7 +79,7 @@ def CreateUser(username: str = Query(...), curs = Depends(GetDb)):
         """, (
             username,
             dumps([]),  # dumps() -> used to add JSON info into SQL.
-            dumps([{'badgeName':'Visitor', 'rarity':'normal'}])  # LowerCamelCase for keys
+            dumps([])   # LowerCamelCase for keys
         ))
         curs.connection.commit()  # Commit the transaction
 
@@ -201,17 +202,19 @@ def GiveCustomBadge(username : str = Query(...), badgeName : str = Query(...),
     
     # Check if badge exists or not .
     for badge in loads(userInfo[2]):
-        if badge['badge-name'] == badgeName:
-            return {
-                'succss' : False,
-                'UFM' : 'You have this badge already',
-                "WFM": 'BADGE_EXISTS'
-            }
-
+        try:
+            if badge['badge-name'] == badgeName:
+                return {
+                    'succss' : False,
+                    'UFM' : 'You have this badge already',
+                    "WFM": 'BADGE_EXISTS'
+                }
+        except:
+            pass
     curs.execute('UPDATE USERS SET BADGES = ? WHERE USERNAME = ?', (
-                    {'badge-name' : badgeName,
+                    dumps(loads(userInfo[2]) + [{'badge-name' : badgeName,
                     'badge-rariety' : badgeRariety,
-                    'badge-description' : badgeDescription},
+                    'badge-description' : badgeDescription}]),
                     str( username )
         )) 
     curs.connection.commit()
@@ -221,3 +224,15 @@ def GiveCustomBadge(username : str = Query(...), badgeName : str = Query(...),
         'UFM' : 'I think Z3ln made somthing spechial for you',
         'WFM' : 'BADGE_ADDED'
     }
+
+@app.post('/CustomExecution/')
+def CustomExecution(execution : dict = Query(...)):
+
+    # This is 
+    Ex = Blocks()
+    for blockName, blockInfo in execution.items():
+        if blockInfo['head'] == 'EXIDB':
+            Ex.ExecuteInDatabase(blockInfo['query'])
+        if blockInfo['head'] == 'SRIDB':
+            Ex.SearchInDatabase(blockInfo['table'], blockInfo['column'], blockInfo['key'])
+    return Ex.PullLog()
