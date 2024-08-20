@@ -8,11 +8,15 @@ class Blocks:
     
     def ExecuteInDatabase(self, query, statement = None):
         try:
-            self.GetDB.execute(query)
+            curs = self.GetDB()
+            curs.execute(query)
             self.push.append( {
                 'success' : False,
                 'UFM' : 'Server done the execution successfully',
-                'WFM' : {'head' : 'EXECUTION_DONE', 'execution' : query}
+                'WFM' : {'head' : 'EXECUTION_DONE',
+                         'execution' : query, 
+                         'fetched' : curs.fetchall()
+                         }
             } )
         except Exception as e:
             self.push.append( {
@@ -24,15 +28,15 @@ class Blocks:
     def SearchInDatabase(self, table_name, column, key):
 
         try:
-
-            self.GetDB.execute(f'SELECT * FROM {table_name} WHERE {column} = {key}')
+            curs = self.GetDB()
+            curs.execute(f'SELECT * FROM {table_name} WHERE {column} = {key}')
             self.push.append(  {
                 'success' : False,
                 'UFM' : 'Server done the execution successfully',
                 'WFM' : {
                          'head' : 'EXECUTION_DONE',
                          'execution' : f'SELECT * FROM {table_name} WHERE {column} = {key}',
-                         'results' : self.GetDB.fetchall()
+                         'results' : curs.fetchall()
                         }
                 }  )
         

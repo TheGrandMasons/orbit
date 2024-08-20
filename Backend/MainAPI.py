@@ -226,11 +226,13 @@ def GiveCustomBadge(username : str = Query(...), badgeName : str = Query(...),
     }
 
 @app.post('/CustomExecution/')
-def CustomExecution(execution : dict = Query(...)):
+def CustomExecution(execution : str = Query(...)):
 
     # This is 
+    exec = loads(execution)
     Ex = Blocks()
-    for blockName, blockInfo in execution.items():
+    for blockName, blockInfo in exec.items():
+        print(blockInfo)
         if blockInfo['head'] == 'EXIDB':
             Ex.ExecuteInDatabase(blockInfo['query'])
         if blockInfo['head'] == 'SRIDB':
