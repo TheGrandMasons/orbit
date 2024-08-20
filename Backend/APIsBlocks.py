@@ -36,7 +36,7 @@ class Blocks:
                 'WFM' : {
                          'head' : 'EXECUTION_DONE',
                          'execution' : f'SELECT * FROM {table_name} WHERE {column} = {key}',
-                         'results' : curs.fetchall()
+                         'fetched' : curs.fetchall()
                         }
                 }  )
         
