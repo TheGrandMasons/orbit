@@ -221,7 +221,7 @@ def GiveCustomBadge(username : str = Query(...), badgeName : str = Query(...),
     return {
         'success' : True,
         'EaserEgg' : random.randint(0000,1090), # It has a huge task to do let us see it later.
-        'UFM' : 'I think Z3ln made somthing spechial for you',
+        'UFM' : 'I think Z3ln made somthing special for you',
         'WFM' : 'BADGE_ADDED'
     }
 
