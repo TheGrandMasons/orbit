@@ -6,6 +6,27 @@ import APIsControllers
 from APIsBlocks import Blocks
 app = FastAPI()
 
+#TODO: Ktlr review this comment.
+# This FastAPI application provides several endpoints for managing users, orreries, and badges.
+
+    # Key functionalities:
+    # 1. User Creation: Allows creating new users with a unique username.
+    # 2. User Information Retrieval: Fetches user details including visits and badges.
+    # 3. Orrery Visits: Tracks visits to orrery models and updates user statistics.
+    # 4. Badge System: Assigns badges to users based on their activity.
+    # 5. Custom Badge Assignment: Allows assigning custom badges to users.
+    # 6. Custom Execution: Provides a way to execute custom database operations.
+
+    # The API uses SQLite for data storage, with tables for Users and Models.
+    # It includes error handling for duplicate usernames, invalid inputs, and non-existent users.
+    # The application also implements a basic badge system, rewarding users for their activity.
+
+    # Note: The '/GetOrreries' endpoint is currently a placeholder and returns an empty list.
+
+    # The API uses dependency injection for database connections and employs JSON serialization
+    # for storing complex data structures in the SQLite database.
+
+
 # /{path-name}  -> is the API path: 192.168.1.7:8000/{path}
 @app.get('/GetOrreries')
 def OrreriesOutput():
@@ -25,14 +46,14 @@ def GetDb():
             # This is our static user info
             conn.cursor().execute("""
                 CREATE TABLE USERS (
-                    USERNAME TEXT, 
+                    USERNAME TEXT,
                     VISITS   TEXT,
                     BADGES   TEXT
                 )
             """)
 
             # Here is Model info . let all in TEXT.
-            # ID for indenticate 
+            # ID for indenticate
             # INFO is json.dumps({"info-key":"info-desc"}) data . will be json serialized in DB
             # To deserialize dumped data just use json.load()
             # Visits is a set of usernames : times EX, {'adelaziz' : 3}, {'seif' : 1}
@@ -40,7 +61,7 @@ def GetDb():
 
             conn.cursor().execute("""
                 CREATE TABLE MODELS (
-                    ID       TEXT, 
+                    ID       TEXT,
                     INFO     TEXT,
                     VISITS   TEXT,
                     STATS    TEXT
@@ -69,7 +90,7 @@ def CreateUser(username: str = Query(...), curs = Depends(GetDb)):
     elif " " in username or any(char in username for char in '!@#$%^&*()'):
         return {
             'success': False,
-            'UFM': random.choice(APIsControllers.UFMs['WRONG_USERNAME_FORMAT']), 
+            'UFM': random.choice(APIsControllers.UFMs['WRONG_USERNAME_FORMAT']),
             'WFM': 'WRONG_USERNAME_FORMAT'
         }
     else:
@@ -118,7 +139,7 @@ def GetUser(username, curs=Depends(GetDb)):
 
 @app.post('/AddVisit/')
 def AddVisit(username : str = Query(...), orr_id : str = Query(...), curs : Cursor = Depends(GetDb)):
-    
+
     curs.execute('SELECT * FROM USERS WHERE USERNAME = ?', (username,))
     userInfo = curs.fetchone()
 
@@ -129,8 +150,8 @@ def AddVisit(username : str = Query(...), orr_id : str = Query(...), curs : Curs
             'success': False,
             'UFM': 'Your login sssion might be ended, please push a bug in our repo TheGrandMasons/orbit',
             'WFM': 'USER_NOT_FOUND'
-            } 
-    
+            }
+
     curs.execute('SELECT * FROM MODELS WHERE ID = ?', (orr_id,))
 
     # loded the set .
@@ -146,8 +167,8 @@ def AddVisit(username : str = Query(...), orr_id : str = Query(...), curs : Curs
 
 
 
-    # Increasing visits number . 
-    newVisitsNumber =  int( userInfo[1] ) + 1 
+    # Increasing visits number .
+    newVisitsNumber =  int( userInfo[1] ) + 1
 
     additions = {}
 
@@ -159,7 +180,7 @@ def AddVisit(username : str = Query(...), orr_id : str = Query(...), curs : Curs
                         'badge-rariety' : 'silver',
                         'badge-description' : 'You Visited more than 10 models, You are an actual visitor !'}]),
                 str( username )
-                )) 
+                ))
             curs.connection.commit()
         else:
             additions['alert'] = 'BADGE_EXISTS'
@@ -187,9 +208,9 @@ def AddVisit(username : str = Query(...), orr_id : str = Query(...), curs : Curs
 @app.post('/GiveBadge/')
 def GiveCustomBadge(username : str = Query(...), badgeName : str = Query(...),
                     badgeRariety : str = Query(...), badgeDescription : str = Query(...), curs : Cursor = Depends(GetDb)):
-    
+
     curs.execute('SELECT * FROM USERS WHERE USERNAME = ? ', (username,))
-    userInfo = curs.fetchone() 
+    userInfo = curs.fetchone()
 
     # fetchone() returns None if nothing in table with Identicator
 
@@ -199,7 +220,7 @@ def GiveCustomBadge(username : str = Query(...), badgeName : str = Query(...),
             'UFM': 'Your login sssion might be ended, please push a bug in our repo TheGrandMasons/orbit',
             'WFM': 'USER_NOT_FOUND'
             }
-    
+
     # Check if badge exists or not .
     for badge in loads(userInfo[2]):
         try:
@@ -216,7 +237,7 @@ def GiveCustomBadge(username : str = Query(...), badgeName : str = Query(...),
                     'badge-rariety' : badgeRariety,
                     'badge-description' : badgeDescription}]),
                     str( username )
-        )) 
+        ))
     curs.connection.commit()
     return {
         'success' : True,
@@ -228,7 +249,7 @@ def GiveCustomBadge(username : str = Query(...), badgeName : str = Query(...),
 @app.post('/CustomExecution/')
 def CustomExecution(execution : str = Query(...)):
 
-    # This is 
+    # This is
     exec = loads(execution)
     Ex = Blocks()
     for blockName, blockInfo in exec.items():
