@@ -31,6 +31,7 @@ type User struct {
 	ID       uint
 	Username string
 	Visits   int32
+  Visited  []NEOID
 	Favs     []Favourites
 }
 
@@ -42,8 +43,7 @@ type NEO struct {
 	ID          uint32 `gorm:"primaryKey;autoIncrement"`
 	Name        string
 	Visits      uint32
-	Description string
-	Visitors    []Visit
+  Description string
 }
 
 type Visit struct {
