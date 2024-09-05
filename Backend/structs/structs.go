@@ -26,3 +26,27 @@ func (r *Response) JSONifyResponse(w http.ResponseWriter) error {
 	}
 	return nil
 }
+
+type User struct {
+	ID       uint
+	Username string
+	Visits   int32
+	Favs     []Favourites
+}
+
+type Favourites struct {
+	NEOID uint32
+}
+
+type NEO struct {
+	ID          uint32 `gorm:"primaryKey;autoIncrement"`
+	Name        string
+	Visits      uint32
+	Description string
+	Visitors    []Visit
+}
+
+type Visit struct {
+	UserID    uint
+	RandomKey int64
+}
