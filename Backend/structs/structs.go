@@ -25,11 +25,9 @@ func (r *Response) JSONifyResponse(w http.ResponseWriter) error {
 	}
 	// Encodes the map into JSON and writes it to the HTTP response writer (w)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		// Returns an error if the encoding or writing fails
-		return err
+		return err // Returns an error if the encoding or writing fails
 	}
-	// Returns nil if everything is successful
-	return nil
+	return nil // Returns nil if everything is successful.
 }
 
 // User struct represents a user entity with various attributes.
