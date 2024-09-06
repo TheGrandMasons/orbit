@@ -38,4 +38,4 @@ type NEOs struct{
 	Description string	
 }
 // Tierlist replaced with badges slice in user table
-// idk what will u do with LOGs and idk understand what is it
+// idk what will u do with LOGs and idk understand what is 
