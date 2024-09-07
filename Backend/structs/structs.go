@@ -17,11 +17,11 @@ type Response struct {
 // JSONifyResponse converts the Response struct into a JSON format and writes it to the HTTP response.
 func (r *Response) JSONifyResponse(w http.ResponseWriter) error {
 	resp := map[string]interface{}{ // Creates a map with key-value pairs to be encoded into JSON
-		"WFM":       r.WFM,        // Add the WFM field to the response
-		"UFM":       r.UFM,        // Add the UFM field to the response
-		"Fetched":   r.Fetched,    // Add the fetched data
-		"Additions": r.Additions,  // Add any additional data
-		"FS":        r.FuncState,  // Add the function state (true or false)
+		"WFM":       r.WFM,       // Add the WFM field to the response
+		"UFM":       r.UFM,       // Add the UFM field to the response
+		"Fetched":   r.Fetched,   // Add the fetched data
+		"Additions": r.Additions, // Add any additional data
+		"FS":        r.FuncState, // Add the function state (true or false)
 	}
 	// Encodes the map into JSON and writes it to the HTTP response writer (w)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -32,10 +32,9 @@ func (r *Response) JSONifyResponse(w http.ResponseWriter) error {
 
 // User struct represents a user entity with various attributes.
 type User struct {
-	ID       uint       // Unique user ID
-	Username string     // Username of the user
-	Visits   int32      // Number of visits made by the user
-	Visited  []NEOID    // List of visited NEO (Near-Earth Object) IDs
+	ID       uint         `gorm:"primaryKey;autoIncrement"`
+	Username string       // Username of the user
+	Visits   int32        // Number of visits made by the user
 	Favs     []Favourites // List of the user's favorite NEOs
 }
 
@@ -47,9 +46,9 @@ type Favourites struct {
 // NEO struct represents a Near-Earth Object with relevant attributes.
 type NEO struct {
 	ID          uint32 `gorm:"primaryKey;autoIncrement"` // Unique NEO ID, auto-incremented
-	Name        string                                   // Name of the NEO
-	Visits      uint32                                   // Number of visits to the NEO
-	Description string                                   // Description of the NEO
+	Name        string // Name of the NEO
+	Visits      uint32 // Number of visits to the NEO
+	Description string // Description of the NEO
 }
 
 // Visit struct represents a visit by a user, with a UserID and RandomKey.
