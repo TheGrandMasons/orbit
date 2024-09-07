@@ -10,6 +10,7 @@ import (
 
 func Register(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	defer r.Body.Close()
+	r.Header.Set("Content-Type", "appliction/json")
 	var data map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		resp := structures.Response{
@@ -47,6 +48,7 @@ func Register(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 
 func GetUserInfo(w http.ResponseWriter, r *http.Request, db gorm.DB) {
 	defer r.Body.Close()
+	r.Header.Set("Content-Type", "appliction/json")
 	var data map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		resp := structures.Response{
