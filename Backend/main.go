@@ -2,9 +2,17 @@ package main
 
 import (
 	"fmt"
-	processors "main/processors"
+	structures "main/structs"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 func main() {
-	fmt.Println(processors.SampleNEOFunc())
+	db, err := gorm.Open(sqlite.Open("orbit_data.db"), &gorm.Config{})
+	if err != nil {
+		fmt.Println("Running Error . Error ['Cannot open database'].")
+		return
+	}
+	db.AutoMigrate(&structures.User{}, &structures.Favourites{}, &structures.NEO{}, &structures.Visit{})
 }

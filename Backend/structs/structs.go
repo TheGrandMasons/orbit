@@ -32,7 +32,7 @@ func (r *Response) JSONifyResponse(w http.ResponseWriter) error {
 
 // User struct represents a user entity with various attributes.
 type User struct {
-	ID       uint         // Unique user ID
+	ID       uint         `gorm:"primaryKey;autoIncrement"`
 	Username string       // Username of the user
 	Visits   int32        // Number of visits made by the user
 	Favs     []Favourites // List of the user's favorite NEOs
