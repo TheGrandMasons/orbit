@@ -30,7 +30,12 @@ Prerequisites:
 - A working database setup (PostgreSQL, MySQL, etc.)
 
 ##### How to run the app:
+##### Setup the frontend
+```bash
+bun run dev
+```
 
+##### Setup the backend
 ```bash
 git clone https://github.com/TheGrandMasons/orbit.git
 ```
