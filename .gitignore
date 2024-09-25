@@ -34,3 +34,6 @@
 # typescript
 /Frontend/*.tsbuildinfo
 /Frontend/next-env.d.ts
+
+# Mason's Shit
+/Shit
