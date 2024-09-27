@@ -51,7 +51,6 @@ type NEO struct {
 	DistanceFromSun uint32
 	OrbitTime       uint32
 	NEOType         string
-	NameSake        string
 	Moons           uint
 	Description     string // Description of the NEO
 }
