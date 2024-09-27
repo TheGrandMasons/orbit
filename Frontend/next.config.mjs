@@ -7,4 +7,4 @@ const nextConfig = {
   output: 'export', // Required for static export in Next.js
 };
 
-module.exports = nextConfig; // Stick to CommonJS export since it's used by default with Next.js
+export default nextConfig; // Stick to CommonJS export since it's used by default with Next.js
