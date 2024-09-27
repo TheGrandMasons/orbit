@@ -4,28 +4,29 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-export default function SolarSystemScene() {
+export default function SolarSystem() {
   const [orbitalSpeedMultiplier, setOrbitalSpeedMultiplier] = useState(16);
   const mountRef = useRef(null);
   const [speed, setSpeed] = useState(1);
   const [selectedBody, setSelectedBody] = useState(null);
+  const [isUserInteracting, setIsUserInteracting] = useState(false);
+  const userInteractionTimeout = useRef(null);
+
 
   useEffect(() => {
-    const currentMount = mountRef.current;
+    let scene, camera, renderer, controls = [];
 
     // Scene setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    const renderer = new THREE.WebGLRenderer();
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000000);
+    renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    currentMount.appendChild(renderer.domElement);
+    mountRef.current.appendChild(renderer.domElement);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
 
     // Updated Solar System Data with Keplerian elements
     const celestialBodies = [
@@ -473,8 +474,8 @@ export default function SolarSystemScene() {
       const scaleFactor = body.parent ? 1 : 5; // Smaller scale for moons, relative to their parent
       const position = new THREE.Vector3(xEcl * scaleFactor, yEcl * scaleFactor, zEcl * scaleFactor);
 
-      // Add parent position for moons
-      return position.add(parentPosition);
+      // For moons, return the position relative to the parent
+      return body.parent ? position : position.add(parentPosition);
     }
 
     // Create celestial bodies and their orbits
@@ -512,30 +513,6 @@ export default function SolarSystemScene() {
       return { body, orbit, ...data };
     }
 
-    // Animation function
-    function animate() {
-      requestAnimationFrame(animate);
-
-      const elapsedTime = clock.getElapsedTime() * speed * orbitalSpeedMultiplier;
-
-      bodies.forEach((bodyData) => {
-        if (bodyData.name === "Sun") return; // Skip the Sun
-
-        const position = calculateOrbitPosition(bodyData, bodyData.epoch + elapsedTime);
-
-        if (bodyData.parent) {
-          // For moons, set position relative to parent
-          bodyData.body.position.copy(position);
-        } else {
-          // For planets, set position in world space
-          bodyData.body.position.copy(position);
-        }
-      });
-
-      controls.update();
-      renderer.render(scene, camera);
-    }
-
     // Body creation loop
     const bodyMap = new Map();
 
@@ -554,13 +531,6 @@ export default function SolarSystemScene() {
         bodyMap.set(data.name, { body: sun, ...data });
       }
     });
-
-    // Helper function to calculate relative position for moons
-    function calculateRelativePosition(bodyData, parentData, t) {
-      const bodyPosition = calculateOrbitPosition(bodyData, t);
-      const parentPosition = calculateOrbitPosition(parentData, t);
-      return bodyPosition.sub(parentPosition);
-    }
 
     // Increase render distance
     camera.position.z = 200;
@@ -583,26 +553,28 @@ export default function SolarSystemScene() {
           const parentBody = bodies.find(b => b.name === bodyData.parent);
           const parentPosition = parentBody.body.position;
           position = calculateOrbitPosition(bodyData, bodyData.epoch + elapsedTime);
-          position.add(parentPosition);
+          bodyData.body.position.copy(position);
         } else {
           position = calculateOrbitPosition(bodyData, bodyData.epoch + elapsedTime);
+          bodyData.body.position.copy(position);
         }
-        bodyData.body.position.copy(position);
       });
+
+      if (selectedBody) {
+        const selectedBodyObject = bodies.find(b => b.name === selectedBody);
+        if (selectedBodyObject) {
+          const target = new THREE.Vector3();
+          selectedBodyObject.body.getWorldPosition(target);
+          camera.position.lerp(target.add(new THREE.Vector3(0, 0, 20)), 0.1);
+          controls.target.lerp(target, 0.1);
+        }
+      }
 
       controls.update();
       renderer.render(scene, camera);
     }
 
     animate();
-
-    function centerCameraOnBody(body) {
-      const target = new THREE.Vector3();
-      body.body.getWorldPosition(target);
-      camera.position.copy(target);
-      camera.position.z += 20;
-      controls.target.copy(target);
-    }
 
     // Raycaster for object selection
     const raycaster = new THREE.Raycaster();
@@ -614,13 +586,12 @@ export default function SolarSystemScene() {
 
       raycaster.setFromCamera(mouse, camera);
 
-      const intersects = raycaster.intersectObjects(scene.children);
+      const intersects = raycaster.intersectObjects(scene.children, true);
 
       if (intersects.length > 0) {
-        const clickedBody = bodies.find((b) => b.body === intersects[0].object);
+        const clickedBody = bodies.find((b) => b.body === intersects[0].object || b.body.isAncestorOf(intersects[0].object));
         if (clickedBody) {
           setSelectedBody(clickedBody.name);
-          centerCameraOnBody(clickedBody);
           bodies.forEach((b) => {
             if (b.orbit) {
               if (b.name === clickedBody.name) {
@@ -643,22 +614,34 @@ export default function SolarSystemScene() {
       }
     }
 
-    window.addEventListener("click", onMouseClick);
-
     function onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
+    window.addEventListener("click", onMouseClick);
     window.addEventListener("resize", onWindowResize, false);
 
+    // Cleanup function
     return () => {
       window.removeEventListener("resize", onWindowResize);
       window.removeEventListener("click", onMouseClick);
-      currentMount.removeChild(renderer.domElement);
+      mountRef.current.removeChild(renderer.domElement);
+      // Dispose of Three.js objects
+      scene.traverse((object) => {
+        if (object.geometry) object.geometry.dispose();
+        if (object.material) {
+          if (Array.isArray(object.material)) {
+            object.material.forEach(material => material.dispose());
+          } else {
+            object.material.dispose();
+          }
+        }
+      });
+      renderer.dispose();
     };
-  }, [speed]);
+  }, [speed, orbitalSpeedMultiplier, selectedBody]);
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
