@@ -45,10 +45,14 @@ type Favourites struct {
 
 // NEO struct represents a Near-Earth Object with relevant attributes.
 type NEO struct {
-	ID          uint32 `gorm:"primaryKey;autoIncrement"` // Unique NEO ID, auto-incremented
-	Name        string // Name of the NEO
-	Visits      uint32 // Number of visits to the NEO
-	Description string // Description of the NEO
+	ID              uint32 `gorm:"primaryKey;autoIncrement"` // Unique NEO ID, auto-incremented
+	Name            string // Name of the NEO
+	Visits          uint32 // Number of visits to the NEO
+	DistanceFromSun uint32
+	OrbitTime       uint32
+	NEOType         string
+	Moons           uint
+	Description     string // Description of the NEO
 }
 
 // Visit struct represents a visit by a user, with a UserID and RandomKey.
