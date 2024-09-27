@@ -39,7 +39,7 @@ jobs:
       - name: Build with Next.js
         run: |
           cd Frontend
-          bun run build
+          bun next build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
