@@ -39,6 +39,7 @@ jobs:
       - name: Build with Next.js
         run: |
           cd Frontend
+          rm -rf /.next
           bun next build
 
       - name: Upload artifact
