@@ -2,12 +2,12 @@
 #
 # To get started with Next.js see: https://nextjs.org/docs/getting-started
 #
-name: Deploy Next.js site to Pages
+name: Deploy Production site to Pages
 
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["mason"]
+    branches: ["main"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -83,7 +83,7 @@ jobs:
   # Deployment job
   deploy:
     environment:
-      name: github-pages
+      name: Production
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
