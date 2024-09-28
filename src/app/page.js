@@ -28,12 +28,12 @@ const Home = () => {
     const texture = new THREE.TextureLoader();
     const cubeTextureLoader = new THREE.CubeTextureLoader();
     scene.background = cubeTextureLoader.load([
-      "/assets/imgs/stars.jpg",
-      "/assets/imgs/stars.jpg",
-      "/assets/imgs/stars.jpg",
-      "/assets/imgs/stars.jpg",
-      "/assets/imgs/stars.jpg",
-      "/assets/imgs/stars.jpg",
+      "/img/stars.jpg",
+      "/img/stars.jpg",
+      "/img/stars.jpg",
+      "/img/stars.jpg",
+      "/img/stars.jpg",
+      "/img/stars.jpg", 
     ]);
 
     // Updated Solar System Data with Keplerian elements
