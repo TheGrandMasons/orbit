@@ -1,3 +1,23 @@
+/*
+1. The radius is given in kilometers. For some smaller objects, these are estimates.
+
+2. The color is represented as a hexadecimal color code. For many NEOs, the exact color is not known, so I've used estimates based on typical asteroid colors.
+
+3. The orbital elements are:
+
+  - a: semi-major axis in Astronomical Units (AU)
+  - e: eccentricity
+  - i: inclination in degrees
+  - omega: longitude of the ascending node in degrees
+  - w: argument of perihelion in degrees
+
+
+4. M0 (Mean anomaly) is set to a placeholder value of 180.0 for all objects, as the exact value would depend on a specific time.
+
+5. The epoch is set to J2020 (JD 2459000.5) for consistency.
+
+6. The period is given in years.
+*/
 const celestialBodies = [
   { name: "Sun", radius: 20, color: 0xffff00, mass: 1.989e30 },
   {
@@ -40,7 +60,7 @@ const celestialBodies = [
     period: 1.0,
   },
   {
-    name: "Shahd",
+    name: "Moon",
     radius: 1.5,
     color: 0xcccccc,
     a: 10,
@@ -397,6 +417,267 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.36149,
     parent: "Neptune",
+  },
+  // NEOs
+  {
+    name: "99942 Apophis",
+    radius: 0.017, // Scaled down from 0.170 km
+    color: 0x8B4513,
+    a: 92.2, // Scaled up from 0.922 AU
+    e: 0.191,
+    i: 3.331,
+    omega: 204.0,
+    w: 126.4,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 0.886,
+  },
+  {
+    name: "101955 Bennu",
+    radius: 0.0245, // Scaled down from 0.245 km
+    color: 0x2F4F4F,
+    a: 112.6, // Scaled up from 1.126 AU
+    e: 0.204,
+    i: 6.035,
+    omega: 2.061,
+    w: 66.223,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.196,
+  },
+  {
+    name: "1950 DA",
+    radius: 0.065, // Scaled down from 0.65 km
+    color: 0x8B4513,
+    a: 169.9, // Scaled up from 1.699 AU
+    e: 0.508,
+    i: 12.18,
+    omega: 356.7,
+    w: 224.6,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 2.214,
+  },
+  {
+    name: "433 Eros",
+    radius: 0.842, // Scaled down from 8.42 km
+    color: 0xD2691E,
+    a: 145.8, // Scaled up from 1.458 AU
+    e: 0.223,
+    i: 10.829,
+    omega: 304.3,
+    w: 178.8,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.76,
+  },
+  {
+    name: "25143 Itokawa",
+    radius: 0.017, // Scaled down from 0.17 km
+    color: 0xDEB887,
+    a: 132.4, // Scaled up from 1.324 AU
+    e: 0.280,
+    i: 1.622,
+    omega: 69.1,
+    w: 162.8,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.521,
+  },
+  {
+    name: "162173 Ryugu",
+    radius: 0.045, // Scaled down from 0.45 km
+    color: 0x2F4F4F,
+    a: 119.0, // Scaled up from 1.190 AU
+    e: 0.190,
+    i: 5.884,
+    omega: 251.6,
+    w: 211.4,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.300,
+  },
+  {
+    name: "2010 TK7",
+    radius: 0.015, // Scaled down from 0.15 km
+    color: 0xA0522D,
+    a: 100.0, // Scaled up from 1.000 AU
+    e: 0.191,
+    i: 20.881,
+    omega: 96.5,
+    w: 45.8,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.000,
+  },
+  {
+    name: "3200 Phaethon",
+    radius: 0.3, // Scaled down from 3.0 km
+    color: 0x4682B4,
+    a: 127.1, // Scaled up from 1.271 AU
+    e: 0.890,
+    i: 22.256,
+    omega: 265.3,
+    w: 322.1,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.433,
+  },
+  {
+    name: "2014 JO25",
+    radius: 0.065, // Scaled down from 0.65 km
+    color: 0x8B4513,
+    a: 206.0, // Scaled up from 2.060 AU
+    e: 0.889,
+    i: 25.27,
+    omega: 30.6,
+    w: 49.6,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 2.956,
+  },
+  {
+    name: "2001 FO32",
+    radius: 0.05, // Scaled down from 0.5 km
+    color: 0xA0522D,
+    a: 221.6, // Scaled up from 2.216 AU
+    e: 0.825,
+    i: 39.021,
+    omega: 187.9,
+    w: 318.3,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 3.299,
+  },
+  {
+    name: "1566 Icarus",
+    radius: 0.07, // Scaled down from 0.7 km
+    color: 0xD2691E,
+    a: 107.8, // Scaled up from 1.078 AU
+    e: 0.827,
+    i: 22.828,
+    omega: 88.0,
+    w: 31.4,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.119,
+  },
+  {
+    name: "2012 TC4",
+    radius: 0.001, // Scaled down from 0.01 km
+    color: 0x708090,
+    a: 140.4, // Scaled up from 1.404 AU
+    e: 0.336,
+    i: 1.857,
+    omega: 274.3,
+    w: 274.1,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.662,
+  },
+  {
+    name: "2015 TB145",
+    radius: 0.02, // Scaled down from 0.2 km
+    color: 0x2F4F4F,
+    a: 129.0, // Scaled up from 1.290 AU
+    e: 0.860,
+    i: 39.772,
+    omega: 38.4,
+    w: 121.8,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.466,
+  },
+  {
+    name: "2017 YE5",
+    radius: 0.05, // Scaled down from 0.5 km
+    color: 0x696969,
+    a: 117.5, // Scaled up from 1.175 AU
+    e: 0.837,
+    i: 6.2,
+    omega: 222.9,
+    w: 290.5,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.274,
+  },
+  {
+    name: "2018 VP1",
+    radius: 0.0002, // Scaled down from 0.002 km
+    color: 0xA9A9A9,
+    a: 103.7, // Scaled up from 1.037 AU
+    e: 0.432,
+    i: 1.714,
+    omega: 185.9,
+    w: 325.9,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.056,
+  },
+  {
+    name: "2019 OK",
+    radius: 0.0057, // Scaled down from 0.057 km
+    color: 0x8B4513,
+    a: 237.6, // Scaled up from 2.376 AU
+    e: 0.756,
+    i: 14.780,
+    omega: 310.6,
+    w: 310.7,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 3.662,
+  },
+  {
+    name: "2020 QG",
+    radius: 0.0003, // Scaled down from 0.003 km
+    color: 0xD3D3D3,
+    a: 101.2, // Scaled up from 1.012 AU
+    e: 0.061,
+    i: 2.956,
+    omega: 154.3,
+    w: 344.3,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.018,
+  },
+  {
+    name: "2021 PH27",
+    radius: 0.05, // Scaled down from 0.5 km
+    color: 0xCD853F,
+    a: 64.6, // Scaled up from 0.646 AU
+    e: 0.711,
+    i: 32.3,
+    omega: 21.7,
+    w: 29.5,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 0.520,
+  },
+  {
+    name: "2023 DW",
+    radius: 0.0025, // Scaled down from 0.025 km
+    color: 0xB8860B,
+    a: 102.3, // Scaled up from 1.023 AU
+    e: 0.049,
+    i: 7.9,
+    omega: 316.8,
+    w: 265.9,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.035,
+  },
+  {
+    name: "2023 BU",
+    radius: 0.00035, // Scaled down from 0.0035 km
+    color: 0xBDB76B,
+    a: 132.2, // Scaled up from 1.322 AU
+    e: 0.398,
+    i: 2.0,
+    omega: 120.5,
+    w: 320.9,
+    M0: 180.0,
+    epoch: 2459000.5,
+    period: 1.520,
   },
 ];
 
