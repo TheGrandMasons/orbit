@@ -2,8 +2,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import { gsap } from "gsap";
-import celestialBodies from './celestialBodies.js'
+import celestialBodies from "./celestialBodies.js";
 
 export default function SolarSystemScene() {
   const mountRef = useRef(null);
@@ -24,14 +27,21 @@ export default function SolarSystemScene() {
   const [uiOrbitalSpeedMultiplier, setUiOrbitalSpeedMultiplier] = useState(16);
   const [uiDistanceScale, setUiDistanceScale] = useState(0.01);
   const [uiSelectedBody, setUiSelectedBody] = useState(null);
+  const [cameraPos, setCameraPos] = useState({ x: 0, y: 200, z: 200 });
+  const [cameraOwner, setCameraOwner] = useState("sun");
+
+  const composerRef = useRef(null);
 
   useEffect(() => {
     const currentMount = mountRef.current;
-
-    // Scene setup
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000000);
-    const renderer = new THREE.WebGLRenderer();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000000
+    );
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     currentMount.appendChild(renderer.domElement);
 
@@ -43,69 +53,127 @@ export default function SolarSystemScene() {
     controls.maxDistance = 50000;
     controls.maxPolarAngle = Math.PI;
 
+    // Set up bloom effect
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      1.5,
+      0.4,
+      0.85
+    );
+    bloomPass.threshold = 0;
+    bloomPass.strength = 2;  // Increased for stronger bloom
+    bloomPass.radius = 1;
+
+    const pointLight = new THREE.PointLight(0xFFF5E1, 10000, 100000000000000);
+    scene.add(pointLight);
+
+    const composer = new EffectComposer(renderer);
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+    composer.addPass(bloomPass);
+
     sceneRef.current = scene;
     cameraRef.current = camera;
     rendererRef.current = renderer;
     controlsRef.current = controls;
+    composerRef.current = composer;
+
+
+    // Add skybox
+    addSkybox();
 
     // Create celestial bodies
     createCelestialBodies();
 
     // Set initial camera position
-    camera.position.set(0, 200, 200);
+    camera.position.set(cameraPos.x, cameraPos.y, cameraPos.z);
     controls.update();
 
     // Animation loop
     function animate() {
       requestAnimationFrame(animate);
-      const elapsedTime = clockRef.current.getElapsedTime() * speedRef.current * orbitalSpeedMultiplierRef.current;
+      const elapsedTime =
+        clockRef.current.getElapsedTime() *
+        speedRef.current *
+        orbitalSpeedMultiplierRef.current;
       updateBodiesPositions(elapsedTime);
       controls.update();
-      renderer.render(scene, camera);
+      composer.render();  // Use composer instead of renderer
     }
 
     animate();
 
     // Event listeners
-    window.addEventListener('resize', onWindowResize);
-    window.addEventListener('click', onMouseClick);
+    window.addEventListener("resize", onWindowResize);
+    window.addEventListener("click", onMouseClick);
 
     // Cleanup
     return () => {
-      window.removeEventListener('resize', onWindowResize);
-      window.removeEventListener('click', onMouseClick);
+      window.removeEventListener("resize", onWindowResize);
+      window.removeEventListener("click", onMouseClick);
       currentMount.removeChild(renderer.domElement);
     };
   }, []);
+
+  function addSkybox() {
+    const loader = new THREE.CubeTextureLoader();
+    const texture = loader.load([
+      "/imgs/stars.jpg",
+      "/imgs/stars.jpg",
+      "/imgs/stars.jpg",
+      "/imgs/stars.jpg",
+      "/imgs/stars.jpg",
+      "/imgs/stars.jpg",
+    ]);
+    sceneRef.current.background = texture;
+  }
 
   function createCelestialBodies() {
     const bodyMap = new Map();
 
     celestialBodies.forEach((data) => {
-      if (data.name !== "Sun") {
+      if (data.name === "Sun") {
+        const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
+        const material = new THREE.MeshBasicMaterial({
+          color: 0xFFF5E1,
+          // color: 0xFFD700,
+          emissive: 0xFFD700,
+          emissiveIntensity: 1,
+        });
+        const sun = new THREE.Mesh(geometry, material);
+        sceneRef.current.add(sun);
+
+        bodiesRef.current.push({ body: sun, ...data });
+        bodyMap.set(data.name, { body: sun, ...data });
+      } else if (data.name === "Earth") {
+        const parentBody = data.parent ? bodyMap.get(data.parent).body : null;
+        const body = createCelestialBody(data, parentBody, true);
+        bodiesRef.current.push(body);
+        bodyMap.set(data.name, body);
+      } else {
         const parentBody = data.parent ? bodyMap.get(data.parent).body : null;
         const body = createCelestialBody(data, parentBody);
         bodiesRef.current.push(body);
         bodyMap.set(data.name, body);
-      } else {
-        const geometry = new THREE.SphereGeometry(data.radius, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ color: data.color });
-        const sun = new THREE.Mesh(geometry, material);
-        sceneRef.current.add(sun);
-        bodiesRef.current.push({ body: sun, ...data });
-        bodyMap.set(data.name, { body: sun, ...data });
       }
     });
   }
 
-  function createCelestialBody(data, parentBody = null) {
-    const geometry = new THREE.SphereGeometry(data.radius, 32, 32);
-    const material = new THREE.MeshBasicMaterial({ color: data.color });
+  function createCelestialBody(
+    data,
+    parentBody = null,
+    isThereTexture = false
+  ) {
+    const geometry = new THREE.SphereGeometry(data.radius, 50, 50);
+    const textureLoader = new THREE.TextureLoader();
+    const material = isThereTexture
+      ? new THREE.MeshPhongMaterial({ map: textureLoader.load(data.mat) })
+      : new THREE.MeshStandardMaterial({ color: data.color });
     const body = new THREE.Mesh(geometry, material);
 
     const orbitGeometry = new THREE.BufferGeometry();
     const orbitMaterial = new THREE.LineBasicMaterial({
-      color: 0xffffff,
+      color: 0x606060,
       transparent: true,
       opacity: 0.1,
     });
@@ -146,7 +214,10 @@ export default function SolarSystemScene() {
     bodiesRef.current.forEach((bodyData) => {
       if (bodyData.name === "Sun") return;
 
-      const bodySpeed = bodyData.name === selectedBodyRef.current ? selectedBodySpeedRef.current : 1;
+      const bodySpeed =
+        bodyData.name === selectedBodyRef.current
+          ? selectedBodySpeedRef.current
+          : 1;
       const position = calculateOrbitPosition(
         bodyData,
         bodyData.epoch + elapsedTime * bodySpeed
@@ -196,7 +267,7 @@ export default function SolarSystemScene() {
       x * Math.sin(degToRad(body.w)) * Math.sin(degToRad(body.i)) +
       y * Math.cos(degToRad(body.w)) * Math.sin(degToRad(body.i));
 
-    return new THREE.Vector3(xEcl, yEcl, zEcl);
+    return new THREE.Vector3(xEcl, zEcl, yEcl);
   }
 
   function degToRad(deg) {
@@ -222,6 +293,7 @@ export default function SolarSystemScene() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    composerRef.current.setSize(window.innerWidth, window.innerHeight);
   }
 
   function onMouseClick(event) {
@@ -240,16 +312,15 @@ export default function SolarSystemScene() {
     if (intersects.length > 0) {
       const clickedBody = findBodyByObject(intersects[0].object);
       if (clickedBody) {
+        setCameraOwner(clickedBody.name);
         selectedBodyRef.current = clickedBody.name;
         setUiSelectedBody(clickedBody.name);
         centerCameraOnBody(clickedBody);
-        // selectedBodySpeedRef.current = 1;
         updateOrbitVisibility(clickedBody);
       }
     } else {
       selectedBodyRef.current = null;
       setUiSelectedBody(null);
-      // selectedBodySpeedRef.current = 1;
       resetOrbitVisibility();
     }
   }
@@ -259,7 +330,11 @@ export default function SolarSystemScene() {
       if (body.body === object || (body.orbit && body.orbit === object)) {
         return body;
       }
-      if (body.body.children.find((child) => child === object || child.children.includes(object))) {
+      if (
+        body.body.children.find(
+          (child) => child === object || child.children.includes(object)
+        )
+      ) {
         return body;
       }
     }
@@ -273,7 +348,9 @@ export default function SolarSystemScene() {
     body.body.getWorldPosition(target);
 
     const distance = body.radius * 2;
-    const endPosition = target.clone().add(new THREE.Vector3(distance, distance / 2, distance));
+    const endPosition = target
+      .clone()
+      .add(new THREE.Vector3(distance, distance / 2, distance));
 
     gsap.to(camera.position, {
       duration: 1,
@@ -336,19 +413,23 @@ export default function SolarSystemScene() {
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
       <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
-      <div style={{
-        position: "absolute",
-        bottom: "20px",
-        left: "20px",
-        background: "rgba(0,0,0,0.5)",
-        padding: "10px",
-        borderRadius: "5px",
-        color: "white",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}>
-        <label htmlFor="speed-slider">Animation Speed: {uiSpeed.toFixed(1)}x</label>
+      <div
+        style={{
+          position: "absolute",
+          bottom: "20px",
+          left: "20px",
+          background: "rgba(0,0,0,0.5)",
+          padding: "10px",
+          borderRadius: "5px",
+          color: "white",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <label htmlFor="speed-slider">
+          Animation Speed: {uiSpeed.toFixed(1)}x
+        </label>
         <input
           id="speed-slider"
           type="range"
@@ -359,7 +440,9 @@ export default function SolarSystemScene() {
           onChange={handleSpeedChange}
           style={{ width: "200px" }}
         />
-        <label htmlFor="orbital-speed-slider">Orbital Speed: {uiOrbitalSpeedMultiplier.toFixed(1)}x</label>
+        <label htmlFor="orbital-speed-slider">
+          Orbital Speed: {uiOrbitalSpeedMultiplier.toFixed(1)}x
+        </label>
         <input
           id="orbital-speed-slider"
           type="range"
@@ -370,7 +453,9 @@ export default function SolarSystemScene() {
           onChange={handleOrbitalSpeedMultiplierChange}
           style={{ width: "200px" }}
         />
-        <label htmlFor="distance-scale-slider">Distance Scale: {(uiDistanceScale * 100).toFixed(2)}%</label>
+        <label htmlFor="distance-scale-slider">
+          Distance Scale: {(uiDistanceScale * 100).toFixed(2)}%
+        </label>
         <input
           id="distance-scale-slider"
           type="range"
@@ -383,18 +468,20 @@ export default function SolarSystemScene() {
         />
       </div>
       {uiSelectedBody && (
-        <div style={{
-          position: "absolute",
-          top: "20px",
-          left: "20px",
-          background: "rgba(0,0,0,0.5)",
-          padding: "10px",
-          borderRadius: "5px",
-          color: "white",
-        }}>
+        <div
+          style={{
+            position: "absolute",
+            top: "20px",
+            left: "20px",
+            background: "rgba(0,0,0,0.5)",
+            padding: "10px",
+            borderRadius: "5px",
+            color: "white",
+          }}
+        >
           Selected: {uiSelectedBody}
         </div>
       )}
     </div>
   );
-} 
+}
