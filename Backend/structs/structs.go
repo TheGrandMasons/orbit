@@ -32,31 +32,31 @@ func (r *Response) JSONifyResponse(w http.ResponseWriter) error {
 
 // User struct represents a user entity with various attributes.
 type User struct {
-	ID       uint         `gorm:"primaryKey;autoIncrement"`
-	Username string       // Username of the user
-	Visits   int32        // Number of visits made by the user
+	ID       uint         `gorm:"primaryKey;autoIncrement" json:"id"`
+	Username string       `json:"username"` // Username of the user
+	Visits   int32        `json:"visits"`   // Number of visits made by the user
 	Favs     []Favourites // List of the user's favorite NEOs
 }
 
 // Favourites struct represents the user's favorite NEOs.
 type Favourites struct {
-	NEOID uint32 // ID of the favorite NEO
+	NEOID uint32 `json:"neoId"` // ID of the favorite NEO
 }
 
 // NEO struct represents a Near-Earth Object with relevant attributes.
 type NEO struct {
-	ID              uint32 `gorm:"primaryKey;autoIncrement"` // Unique NEO ID, auto-incremented
-	Name            string // Name of the NEO
-	Visits          uint32 // Number of visits to the NEO
-	DistanceFromSun uint32
-	OrbitTime       uint32
-	NEOType         string
-	Moons           uint
-	Description     string // Description of the NEO
+	ID              uint32 `gorm:"primaryKey;autoIncrement" json:"id"` // Unique NEO ID, auto-incremented
+	Name            string `json:"name"`                               // Name of the NEO
+	Visits          uint32 `json:"visits"`                             // Number of visits to the NEO
+	DistanceFromSun uint32 `json:"distanceFromSun"`
+	OrbitTime       uint32 `json:"orbitTime"`
+	NEOType         string `json:"neoType"`
+	Moons           uint   `json:"moons"`
+	Description     string `json:"description"` // Description of the NEO
 }
 
 // Visit struct represents a visit by a user, with a UserID and RandomKey.
 type Visit struct {
-	UserID    uint  // ID of the user who made the visit
-	RandomKey int64 // RandomKey could represent some form of session or visit identifier
+	UserID    uint  `json:"userId"`    // ID of the user who made the visit
+	RandomKey int64 `json:"randomKey"` // RandomKey could represent some form of session or visit identifier
 }
