@@ -51,7 +51,7 @@ export default function SolarSystemScene() {
     controls.dampingFactor = 0.05;
 
     // Optional: Set the zoom restrictions
-    controls.minDistance = 42; // Minimum zoom distance
+    controls.minDistance = 21; // Minimum zoom distance
     controls.maxDistance = 50000; // Maximum zoom distance
 
     // Set up bloom effect
