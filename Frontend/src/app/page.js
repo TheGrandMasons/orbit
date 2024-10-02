@@ -9,6 +9,7 @@ import { gsap } from "gsap";
 import celestialBodies from "./celestialBodies.js";
 
 export default function SolarSystemScene() {
+  const texturePath = window.location.hostname == "localhost" ? "" : "/orbit";
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -89,7 +90,6 @@ export default function SolarSystemScene() {
     camera.position.set(0, 200, 200);
     controls.update();
 
-    // Animation loop
     function animate() {
       requestAnimationFrame(animate);
       const elapsedTime =
@@ -97,15 +97,14 @@ export default function SolarSystemScene() {
         speedRef.current *
         orbitalSpeedMultiplierRef.current;
       updateBodiesPositions(elapsedTime);
-      controls.update();
-      composer.render(); // Use composer instead of renderer
-      if (mainObjRef.current) {
-        // controls.autoRotate = true;
-        controls.enableRotate = true;
-        controls.target.copy(mainObjRef.current.position);
-      }
-    }
 
+      if (mainObjRef.current) {
+        controlsRef.current.target.copy(mainObjRef.current.body.position);
+      }
+
+      controlsRef.current.update();
+      composerRef.current.render();
+    }
     animate();
 
     // Event listeners
@@ -123,12 +122,12 @@ export default function SolarSystemScene() {
   function addSkybox() {
     const loader = new THREE.CubeTextureLoader();
     const texture = loader.load([
-      "/orbit/imgs/stars.jpg",
-      "/orbit/imgs/stars.jpg",
-      "/orbit/imgs/stars.jpg",
-      "/orbit/imgs/stars.jpg",
-      "/orbit/imgs/stars.jpg",
-      "/orbit/imgs/stars.jpg",
+      `${texturePath}/imgs/stars.jpg`,
+      `${texturePath}/imgs/stars.jpg`,
+      `${texturePath}/imgs/stars.jpg`,
+      `${texturePath}/imgs/stars.jpg`,
+      `${texturePath}/imgs/stars.jpg`,
+      `${texturePath}/imgs/stars.jpg`,
     ]);
     sceneRef.current.background = texture;
   }
@@ -141,7 +140,6 @@ export default function SolarSystemScene() {
         const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
         const material = new THREE.MeshBasicMaterial({
           color: 0xfff5e1,
-          // color: 0xFFD700,
           emissive: 0xffd700,
           emissiveIntensity: 1,
         });
@@ -150,11 +148,6 @@ export default function SolarSystemScene() {
 
         bodiesRef.current.push({ body: sun, ...data });
         bodyMap.set(data.name, { body: sun, ...data });
-        // } else if (data.name === "Earth") {
-        //   const parentBody = data.parent ? bodyMap.get(data.parent).body : null;
-        //   const body = createCelestialBody(data, parentBody);
-        //   bodiesRef.current.push(body);
-        //   bodyMap.set(data.name, body);
       } else {
         const parentBody = data.parent ? bodyMap.get(data.parent).body : null;
         const body = createCelestialBody(data, parentBody);
@@ -166,21 +159,20 @@ export default function SolarSystemScene() {
 
   function createCelestialBody(data, parentBody = null) {
     const planet = new THREE.Group();
+    const textureLoader = new THREE.TextureLoader();
     if (data.name === "Earth") {
       // Create main Earth sphere
       const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
-      const textureLoader = new THREE.TextureLoader();
-
       // Base Earth material
       const earthMaterial = new THREE.MeshPhongMaterial({
-        map: textureLoader.load(data.mat),
+        map: textureLoader.load(`${texturePath + data.mat}`),
       });
       const earthMesh = new THREE.Mesh(geometry, earthMaterial);
       planet.add(earthMesh);
 
       // Night lights layer
       const earthLightMaterial = new THREE.MeshBasicMaterial({
-        map: textureLoader.load(data.night),
+        map: textureLoader.load(`${texturePath + data.night}`),
         blending: THREE.CustomBlending,
         blendEquation: THREE.AddEquation,
         blendSrc: THREE.OneFactor,
@@ -191,7 +183,7 @@ export default function SolarSystemScene() {
 
       // Cloud layer
       const cloudMaterial = new THREE.MeshPhongMaterial({
-        map: textureLoader.load(data.clouds),
+        map: textureLoader.load(`${texturePath + data.clouds}`),
         transparent: true,
         opacity: 0.8,
       });
@@ -212,7 +204,9 @@ export default function SolarSystemScene() {
       // Create other celestial bodies as before
       const geometry = new THREE.SphereGeometry(data.radius, 50, 50);
       const material = data.mat
-        ? new THREE.MeshPhongMaterial({ map: textureLoader.load(data.mat) })
+        ? new THREE.MeshPhongMaterial({
+            map: textureLoader.load(`${texturePath + data.mat}`),
+          })
         : new THREE.MeshStandardMaterial({ color: data.color });
       const body = new THREE.Mesh(geometry, material);
       planet.add(body);
@@ -342,7 +336,6 @@ export default function SolarSystemScene() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     composerRef.current.setSize(window.innerWidth, window.innerHeight);
   }
-
   function onMouseClick(event) {
     const camera = cameraRef.current;
     const scene = sceneRef.current;
@@ -358,12 +351,12 @@ export default function SolarSystemScene() {
 
     if (intersects.length > 0) {
       const clickedBody = findBodyByObject(intersects[0].object);
-      if (clickedBody && intersects[0].object.type == "Mesh") {
+      if (clickedBody && intersects[0].object.type === "Mesh") {
         selectedBodyRef.current = clickedBody.name;
-        mainObjRef.current = intersects[0].object;
+        mainObjRef.current = clickedBody;
         setUiSelectedBody(clickedBody.name);
-        centerCameraOnBody(clickedBody);
         updateOrbitVisibility(clickedBody);
+        centerCameraOnBody(clickedBody);
       }
     } else {
       selectedBodyRef.current = null;
@@ -371,7 +364,6 @@ export default function SolarSystemScene() {
       resetOrbitVisibility();
     }
   }
-
   function findBodyByObject(object) {
     for (const body of bodiesRef.current) {
       if (body.body === object || (body.orbit && body.orbit === object)) {
