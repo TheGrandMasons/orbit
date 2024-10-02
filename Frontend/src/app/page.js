@@ -2,9 +2,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 import { gsap } from "gsap";
 import celestialBodies from "./celestialBodies.js";
 
@@ -16,6 +16,7 @@ export default function SolarSystemScene() {
   const controlsRef = useRef(null);
   const bodiesRef = useRef([]);
   const clockRef = useRef(new THREE.Clock());
+  const mainObjRef = useRef(null);
 
   const speedRef = useRef(1);
   const orbitalSpeedMultiplierRef = useRef(16);
@@ -39,7 +40,7 @@ export default function SolarSystemScene() {
       0.1,
       1000000
     );
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     currentMount.appendChild(renderer.domElement);
 
@@ -50,7 +51,7 @@ export default function SolarSystemScene() {
     controls.dampingFactor = 0.05;
 
     // Optional: Set the zoom restrictions
-    controls.minDistance = 42;    // Minimum zoom distance
+    controls.minDistance = 42; // Minimum zoom distance
     controls.maxDistance = 50000; // Maximum zoom distance
 
     // Set up bloom effect
@@ -61,10 +62,10 @@ export default function SolarSystemScene() {
       0.85
     );
     bloomPass.threshold = 0;
-    bloomPass.strength = 2;  // Increased for stronger bloom
+    bloomPass.strength = 2; // Increased for stronger bloom
     bloomPass.radius = 1;
 
-    const pointLight = new THREE.PointLight(0xFFF5E1, 10000, 999999999999999);
+    const pointLight = new THREE.PointLight(0xfff5e1, 10000, 999999999999999);
     scene.add(pointLight);
 
     const composer = new EffectComposer(renderer);
@@ -77,7 +78,6 @@ export default function SolarSystemScene() {
     rendererRef.current = renderer;
     controlsRef.current = controls;
     composerRef.current = composer;
-
 
     // Add skybox
     addSkybox();
@@ -98,7 +98,12 @@ export default function SolarSystemScene() {
         orbitalSpeedMultiplierRef.current;
       updateBodiesPositions(elapsedTime);
       controls.update();
-      composer.render();  // Use composer instead of renderer
+      composer.render(); // Use composer instead of renderer
+      if (mainObjRef.current) {
+        // controls.autoRotate = true;
+        controls.enableRotate = true;
+        controls.target.copy(mainObjRef.current.position);
+      }
     }
 
     animate();
@@ -118,12 +123,12 @@ export default function SolarSystemScene() {
   function addSkybox() {
     const loader = new THREE.CubeTextureLoader();
     const texture = loader.load([
-      "/imgs/stars.jpg",
-      "/imgs/stars.jpg",
-      "/imgs/stars.jpg",
-      "/imgs/stars.jpg",
-      "/imgs/stars.jpg",
-      "/imgs/stars.jpg",
+      "/orbit/imgs/stars.jpg",
+      "/orbit/imgs/stars.jpg",
+      "/orbit/imgs/stars.jpg",
+      "/orbit/imgs/stars.jpg",
+      "/orbit/imgs/stars.jpg",
+      "/orbit/imgs/stars.jpg",
     ]);
     sceneRef.current.background = texture;
   }
@@ -135,9 +140,9 @@ export default function SolarSystemScene() {
       if (data.name === "Sun") {
         const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
         const material = new THREE.MeshBasicMaterial({
-          color: 0xFFF5E1,
+          color: 0xfff5e1,
           // color: 0xFFD700,
-          emissive: 0xFFD700,
+          emissive: 0xffd700,
           emissiveIntensity: 1,
         });
         const sun = new THREE.Mesh(geometry, material);
@@ -243,26 +248,26 @@ export default function SolarSystemScene() {
     // Convert to 3D coordinates
     const xEcl =
       x *
-      (Math.cos(degToRad(body.omega)) * Math.cos(degToRad(body.w)) -
-        Math.sin(degToRad(body.omega)) *
-        Math.sin(degToRad(body.w)) *
-        Math.cos(degToRad(body.i))) -
+        (Math.cos(degToRad(body.omega)) * Math.cos(degToRad(body.w)) -
+          Math.sin(degToRad(body.omega)) *
+            Math.sin(degToRad(body.w)) *
+            Math.cos(degToRad(body.i))) -
       y *
-      (Math.cos(degToRad(body.omega)) * Math.sin(degToRad(body.w)) +
-        Math.sin(degToRad(body.omega)) *
-        Math.cos(degToRad(body.w)) *
-        Math.cos(degToRad(body.i)));
+        (Math.cos(degToRad(body.omega)) * Math.sin(degToRad(body.w)) +
+          Math.sin(degToRad(body.omega)) *
+            Math.cos(degToRad(body.w)) *
+            Math.cos(degToRad(body.i)));
     const yEcl =
       x *
-      (Math.sin(degToRad(body.omega)) * Math.cos(degToRad(body.w)) +
-        Math.cos(degToRad(body.omega)) *
-        Math.sin(degToRad(body.w)) *
-        Math.cos(degToRad(body.i))) +
+        (Math.sin(degToRad(body.omega)) * Math.cos(degToRad(body.w)) +
+          Math.cos(degToRad(body.omega)) *
+            Math.sin(degToRad(body.w)) *
+            Math.cos(degToRad(body.i))) +
       y *
-      (Math.cos(degToRad(body.omega)) *
-        Math.cos(degToRad(body.w)) *
-        Math.cos(degToRad(body.i)) -
-        Math.sin(degToRad(body.omega)) * Math.sin(degToRad(body.w)));
+        (Math.cos(degToRad(body.omega)) *
+          Math.cos(degToRad(body.w)) *
+          Math.cos(degToRad(body.i)) -
+          Math.sin(degToRad(body.omega)) * Math.sin(degToRad(body.w)));
     const zEcl =
       x * Math.sin(degToRad(body.w)) * Math.sin(degToRad(body.i)) +
       y * Math.cos(degToRad(body.w)) * Math.sin(degToRad(body.i));
@@ -311,8 +316,9 @@ export default function SolarSystemScene() {
 
     if (intersects.length > 0) {
       const clickedBody = findBodyByObject(intersects[0].object);
-      if (clickedBody) {
+      if (clickedBody && intersects[0].object.type == "Mesh") {
         selectedBodyRef.current = clickedBody.name;
+        mainObjRef.current = intersects[0].object;
         setUiSelectedBody(clickedBody.name);
         centerCameraOnBody(clickedBody);
         updateOrbitVisibility(clickedBody);

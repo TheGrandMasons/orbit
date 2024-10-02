@@ -3,7 +3,7 @@
 
 2. The color is represented as a hexadecimal color code. For many NEOs, the exact color is not known, so I've used estimates based on typical asteroid colors.
 
-3. The orbital elements are:
+3. The /orbital elements are:
 
   - a: semi-major axis in Astronomical Units (AU)
   - e: eccentricity
@@ -24,7 +24,7 @@ const celestialBodies = [
     name: "Mercury",
     radius: 3,
     color: 0x8c7853,
-    mat: "/assets/M.jpg",
+    mat: "/orbit/assets/M.jpg",
     a: 38.7,
     e: 0.206,
     i: 7.0,
@@ -38,7 +38,7 @@ const celestialBodies = [
     name: "Venus",
     radius: 4,
     color: 0xffd700,
-    mat: "/assets/V.jpg",
+    mat: "/orbit/assets/V.jpg",
     a: 72.3,
     e: 0.007,
     i: 3.4,
@@ -52,9 +52,9 @@ const celestialBodies = [
     name: "Earth",
     radius: 4,
     color: 0x1F9FFF,
-    mat: "/assets/earth.jpg",
-    night: "/assets/earth_night_light.jpg",
-    clouds: "/assets/earth_clouds.jpg",
+    mat: "/orbit/assets/earth.jpg",
+    night: "/orbit/assets/earth_night_light.jpg",
+    clouds: "/orbit/assets/earth_clouds.jpg",
     a: 100,
     e: 0.017,
     i: 0.0,
@@ -68,7 +68,7 @@ const celestialBodies = [
     name: "Moon",
     radius: 1.5,
     color: 0xcccccc,
-    mat: "/assets/moon.jpg",
+    mat: "/orbit/assets/moon.jpg",
     a: 10,
     e: 0.0549,
     i: 5.145,
@@ -83,7 +83,7 @@ const celestialBodies = [
     name: "Mars",
     radius: 3.5,
     color: 0xff4500,
-    mat: "/assets/mars.jpg",
+    mat: "/orbit/assets/mars.jpg",
     a: 152,
     e: 0.093,
     i: 1.8,
@@ -97,7 +97,7 @@ const celestialBodies = [
     name: "Jupiter",
     radius: 11,
     color: 0xffa500,
-    mat: "/assets/jupiter.jpg",
+    mat: "/orbit/assets/jupiter.jpg",
     a: 520,
     e: 0.048,
     i: 1.3,
@@ -139,7 +139,7 @@ const celestialBodies = [
     name: "Saturn",
     radius: 9,
     color: 0xffd700,
-    mat: "/assets/saturn.jpg",
+    mat: "/orbit/assets/saturn.jpg",
     a: 953,
     e: 0.054,
     i: 2.5,
@@ -167,7 +167,7 @@ const celestialBodies = [
     name: "Uranus",
     radius: 6,
     color: 0x40e0d0,
-    mat: "/assets/uranus.jpg",
+    mat: "/orbit/assets/uranus.jpg",
     a: 1920,
     e: 0.047,
     i: 0.8,
@@ -181,7 +181,7 @@ const celestialBodies = [
     name: "Neptune",
     radius: 5.8,
     color: 0x4169e1,
-    mat: "/assets/neptune.jpg",
+    mat: "/orbit/assets/neptune.jpg",
     a: 3007,
     e: 0.009,
     i: 1.8,
