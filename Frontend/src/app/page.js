@@ -164,19 +164,61 @@ export default function SolarSystemScene() {
     });
   }
 
-  function createCelestialBody(
-    data,
-    parentBody = null,
-    isThereTexture = false
-  ) {
-    const geometry = new THREE.SphereGeometry(data.radius, 50, 50);
-    const textureLoader = new THREE.TextureLoader();
-
-    const material = data.mat
-      ? new THREE.MeshPhongMaterial({ map: textureLoader.load(data.mat) })
-      : new THREE.MeshStandardMaterial({ color: data.color });
-    const body = new THREE.Mesh(geometry, material);
-
+  function createCelestialBody(data, parentBody = null) {
+    const planet = new THREE.Group();
+    
+    if (data.name === "Earth") {
+      // Create main Earth sphere
+      const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
+      const textureLoader = new THREE.TextureLoader();
+      
+      // Base Earth material
+      const earthMaterial = new THREE.MeshPhongMaterial({
+        map: textureLoader.load(data.mat),
+      });
+      const earthMesh = new THREE.Mesh(geometry, earthMaterial);
+      planet.add(earthMesh);
+  
+      // Night lights layer
+      const earthLightMaterial = new THREE.MeshBasicMaterial({
+        map: textureLoader.load(data.night),
+        blending: THREE.CustomBlending,
+        blendEquation: THREE.AddEquation,
+        blendSrc: THREE.OneFactor,
+        blendDst: THREE.SrcAlphaFactor,
+      });
+      const earthLightMesh = new THREE.Mesh(geometry, earthLightMaterial);
+      planet.add(earthLightMesh);
+  
+      // Cloud layer
+      const cloudMaterial = new THREE.MeshPhongMaterial({
+        map: textureLoader.load(data.clouds),
+        transparent: true,
+        opacity: 0.8,
+      });
+      const cloudMesh = new THREE.Mesh(geometry, cloudMaterial);
+      cloudMesh.scale.setScalar(1.0075); // Slightly larger than Earth
+      planet.add(cloudMesh);
+  
+      // Atmosphere layer
+      const atmosMaterial = new THREE.MeshLambertMaterial({
+        color: 0x1F9FFF,
+        transparent: true,
+        opacity: 0.3,
+      });
+      const atmosMesh = new THREE.Mesh(geometry, atmosMaterial);
+      atmosMesh.scale.setScalar(1.02); // Larger than clouds
+      planet.add(atmosMesh);
+  
+    } else {
+      // Create other celestial bodies as before
+      const geometry = new THREE.SphereGeometry(data.radius, 50, 50);
+      const material = new THREE.MeshStandardMaterial({ color: data.color });
+      const body = new THREE.Mesh(geometry, material);
+      planet.add(body);
+    }
+  
+    // Create orbit
     const orbitGeometry = new THREE.BufferGeometry();
     const orbitMaterial = new THREE.LineBasicMaterial({
       color: 0x606060,
@@ -191,31 +233,30 @@ export default function SolarSystemScene() {
         orbitPoints.push(position);
       }
     }
-
+  
     if (orbitPoints.length > 0) {
       orbitGeometry.setFromPoints(orbitPoints);
       const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
-
+  
       if (parentBody) {
-        parentBody.add(body);
+        parentBody.add(planet);
         parentBody.add(orbit);
       } else {
-        sceneRef.current.add(body);
+        sceneRef.current.add(planet);
         sceneRef.current.add(orbit);
       }
-
-      return { body, orbit, ...data };
+  
+      return { body: planet, orbit, ...data };
     } else {
       console.warn(`Failed to create orbit for ${data.name}`);
       if (parentBody) {
-        parentBody.add(body);
+        parentBody.add(planet);
       } else {
-        sceneRef.current.add(body);
+        sceneRef.current.add(planet);
       }
-      return { body, ...data };
+      return { body: planet, ...data };
     }
   }
-
   function updateBodiesPositions(elapsedTime) {
     bodiesRef.current.forEach((bodyData) => {
       if (bodyData.name === "Sun") return;
