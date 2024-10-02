@@ -171,7 +171,8 @@ export default function SolarSystemScene() {
   ) {
     const geometry = new THREE.SphereGeometry(data.radius, 50, 50);
     const textureLoader = new THREE.TextureLoader();
-    const material = isThereTexture
+
+    const material = data.mat
       ? new THREE.MeshPhongMaterial({ map: textureLoader.load(data.mat) })
       : new THREE.MeshStandardMaterial({ color: data.color });
     const body = new THREE.Mesh(geometry, material);
