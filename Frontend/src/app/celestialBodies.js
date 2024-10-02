@@ -691,7 +691,7 @@ const celestialBodies = [
     period: 1.05,
   },
   // Astroid Belt
-  
+  {
     name: "Ceres",
     radius: 4.6,
     color: 0xc0c0c0,
