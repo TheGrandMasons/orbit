@@ -9,8 +9,6 @@ import { gsap } from "gsap";
 import celestialBodies from "./celestialBodies.js";
 
 export default function SolarSystemScene() {
-  if (typeof window !== "undefined") {
-  }
   const texturePath =
     typeof window !== "undefined"
       ? window.location.hostname == "localhost"
