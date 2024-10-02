@@ -159,10 +159,11 @@ export default function SolarSystemScene() {
 
   function createCelestialBody(data, parentBody = null) {
     const planet = new THREE.Group();
-    const textureLoader = new THREE.TextureLoader();
     if (data.name === "Earth") {
       // Create main Earth sphere
       const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
+      const textureLoader = new THREE.TextureLoader();
+
       // Base Earth material
       const earthMaterial = new THREE.MeshPhongMaterial({
         map: textureLoader.load(`${texturePath + data.mat}`),
