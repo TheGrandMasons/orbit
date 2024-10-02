@@ -7,9 +7,11 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 import { gsap } from "gsap";
 import celestialBodies from "./celestialBodies.js";
+if (typeof window !== "undefined") {
+  const texturePath = window.location.hostname == "localhost" ? "" : "/orbit";
+}
 
 export default function SolarSystemScene() {
-  const texturePath = window.location.hostname == "localhost" ? "" : "/orbit";
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
