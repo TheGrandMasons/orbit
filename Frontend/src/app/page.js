@@ -171,6 +171,11 @@ export default function SolarSystemScene() {
       // Create main Earth sphere
       const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
       const textureLoader = new THREE.TextureLoader();
+
+      const material = data.mat
+        ? new THREE.MeshPhongMaterial({ map: textureLoader.load(data.mat) })
+        : new THREE.MeshStandardMaterial({ color: data.color });
+        const body = new THREE.Mesh(geometry, material);
       
       // Base Earth material
       const earthMaterial = new THREE.MeshPhongMaterial({
