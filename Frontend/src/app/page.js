@@ -9,10 +9,11 @@ import { gsap } from "gsap";
 import celestialBodies from "./celestialBodies.js";
 
 export default function SolarSystemScene() {
-  const [texturePath, setTexturePath] = useState(
-    window.location.hostname == "localhost" ? "" : "/orbit"
-  );
+  // const texturePath = useRef(
+  //   window.location.hostname == "localhost" ? "" : "/orbit"
+  // );
   // setTexturePath();
+  const texturePath = "/orbit";
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -125,12 +126,12 @@ export default function SolarSystemScene() {
   function addSkybox() {
     const loader = new THREE.CubeTextureLoader();
     const texture = loader.load([
-      `${texturePath}/imgs/stars.jpg`,
-      `${texturePath}/imgs/stars.jpg`,
-      `${texturePath}/imgs/stars.jpg`,
-      `${texturePath}/imgs/stars.jpg`,
-      `${texturePath}/imgs/stars.jpg`,
-      `${texturePath}/imgs/stars.jpg`,
+      `${texturePath.current}/imgs/stars.jpg`,
+      `${texturePath.current}/imgs/stars.jpg`,
+      `${texturePath.current}/imgs/stars.jpg`,
+      `${texturePath.current}/imgs/stars.jpg`,
+      `${texturePath.current}/imgs/stars.jpg`,
+      `${texturePath.current}/imgs/stars.jpg`,
     ]);
     sceneRef.current.background = texture;
   }
@@ -169,14 +170,14 @@ export default function SolarSystemScene() {
 
       // Base Earth material
       const earthMaterial = new THREE.MeshPhongMaterial({
-        map: textureLoader.load(`${texturePath + data.mat}`),
+        map: textureLoader.load(`${texturePath.current + data.mat}`),
       });
       const earthMesh = new THREE.Mesh(geometry, earthMaterial);
       planet.add(earthMesh);
 
       // Night lights layer
       const earthLightMaterial = new THREE.MeshBasicMaterial({
-        map: textureLoader.load(`${texturePath + data.night}`),
+        map: textureLoader.load(`${texturePath.current + data.night}`),
         blending: THREE.CustomBlending,
         blendEquation: THREE.AddEquation,
         blendSrc: THREE.OneFactor,
@@ -187,7 +188,7 @@ export default function SolarSystemScene() {
 
       // Cloud layer
       const cloudMaterial = new THREE.MeshPhongMaterial({
-        map: textureLoader.load(`${texturePath + data.clouds}`),
+        map: textureLoader.load(`${texturePath.current + data.clouds}`),
         transparent: true,
         opacity: 0.8,
       });
