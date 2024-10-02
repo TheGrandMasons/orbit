@@ -9,12 +9,12 @@ import { gsap } from "gsap";
 import celestialBodies from "./celestialBodies.js";
 
 export default function SolarSystemScene() {
+  const [texturePath, setTexturePath] = useState("");
   if (typeof window !== "undefined") {
     if (window.location.hostname != "localhost") {
       setTexturePath("/orbit");
     }
   }
-  const [texturePath, setTexturePath] = useState("");
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
