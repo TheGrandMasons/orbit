@@ -64,8 +64,11 @@ export default function SolarSystemScene() {
     bloomPass.strength = 2;  // Increased for stronger bloom
     bloomPass.radius = 1;
 
-    const pointLight = new THREE.PointLight(0xFFF5E1, 10000, 100000000000000);
+    const pointLight = new THREE.PointLight(0xffffff, 10000, 100000000000000);
     scene.add(pointLight);
+
+    const ambient = new THREE.AmbientLight(0xffffff,0.1);
+    // scene.add(ambient);
 
     const composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene, camera);
@@ -159,11 +162,10 @@ export default function SolarSystemScene() {
 
   function createCelestialBody(data, parentBody = null) {
     const planet = new THREE.Group();
-    
+    const textureLoader = new THREE.TextureLoader();
     if (data.name === "Earth") {
-      // Create main Earth sphere
       const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
-      const textureLoader = new THREE.TextureLoader();
+      
       
       // Base Earth material
       const earthMaterial = new THREE.MeshPhongMaterial({
@@ -171,42 +173,77 @@ export default function SolarSystemScene() {
       });
       const earthMesh = new THREE.Mesh(geometry, earthMaterial);
       planet.add(earthMesh);
-  
-      // Night lights layer
-      const earthLightMaterial = new THREE.MeshBasicMaterial({
-        map: textureLoader.load(data.night),
-        blending: THREE.CustomBlending,
-        blendEquation: THREE.AddEquation,
-        blendSrc: THREE.OneFactor,
-        blendDst: THREE.SrcAlphaFactor,
+      
+      // Create a custom shader material for night lights
+      const nightMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          nightTexture: { type: 't', value: textureLoader.load('/assets/E2.jpg') },
+          opacity: { type: 'f', value: 1.0 },
+          emissiveStrength: { type: 'f', value: 5.0 }
+      },
+        vertexShader: `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform sampler2D nightTexture;
+          uniform float opacity;
+          uniform float emissiveStrength;  // New uniform to control emissive brightness
+          varying vec2 vUv;
+
+          void main() {
+              // Sample the texture
+              vec4 nightColor = texture2D(nightTexture, vUv);
+              
+              // Calculate brightness (luminance) of the texture color
+              float brightness = dot(nightColor.rgb, vec3(0.299, 0.587, 0.114));
+              
+              // Adjust brightness with emissive strength to simulate emission (glow)
+              vec3 emissiveColor = nightColor.rgb * emissiveStrength;
+              
+              // Final color with increased brightness and opacity control
+              vec4 finalColor = vec4(emissiveColor, brightness * opacity);
+              
+              // Set the final fragment color
+              gl_FragColor = finalColor;
+          }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        
       });
-      const earthLightMesh = new THREE.Mesh(geometry, earthLightMaterial);
-      planet.add(earthLightMesh);
+      
+      const nightMesh = new THREE.Mesh(geometry, nightMaterial);
+      nightMesh.scale.setScalar(1.001);
+      planet.add(nightMesh);
   
-      // Cloud layer
       const cloudMaterial = new THREE.MeshPhongMaterial({
         map: textureLoader.load(data.clouds),
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.7,
       });
       const cloudMesh = new THREE.Mesh(geometry, cloudMaterial);
-      cloudMesh.scale.setScalar(1.0075); // Slightly larger than Earth
+      cloudMesh.scale.setScalar(1.01);
       planet.add(cloudMesh);
-  
-      // Atmosphere layer
-      const atmosMaterial = new THREE.MeshLambertMaterial({
-        color: 0x1F9FFF,
+
+      const atmos_mat = new THREE.MeshLambertMaterial({
+        color: data.color,
         transparent: true,
-        opacity: 0.3,
+        opacity: 0.1
       });
-      const atmosMesh = new THREE.Mesh(geometry, atmosMaterial);
-      atmosMesh.scale.setScalar(1.02); // Larger than clouds
-      planet.add(atmosMesh);
-  
-    } else {
+      const atmos = new THREE.Mesh(geometry, atmos_mat);
+      atmos.scale.setScalar(1.02);
+      planet.add(atmos);
+    }else {
       // Create other celestial bodies as before
       const geometry = new THREE.SphereGeometry(data.radius, 50, 50);
-      const material = new THREE.MeshStandardMaterial({ color: data.color });
+      // const material = new THREE.MeshStandardMaterial({ color: data.color });
+      const material = new THREE.MeshPhongMaterial({
+        map: textureLoader.load(data.mat),
+      });
       const body = new THREE.Mesh(geometry, material);
       planet.add(body);
     }
