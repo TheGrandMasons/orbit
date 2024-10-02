@@ -150,11 +150,11 @@ export default function SolarSystemScene() {
 
         bodiesRef.current.push({ body: sun, ...data });
         bodyMap.set(data.name, { body: sun, ...data });
-      } else if (data.name === "Earth") {
-        const parentBody = data.parent ? bodyMap.get(data.parent).body : null;
-        const body = createCelestialBody(data, parentBody, true);
-        bodiesRef.current.push(body);
-        bodyMap.set(data.name, body);
+        // } else if (data.name === "Earth") {
+        //   const parentBody = data.parent ? bodyMap.get(data.parent).body : null;
+        //   const body = createCelestialBody(data, parentBody);
+        //   bodiesRef.current.push(body);
+        //   bodyMap.set(data.name, body);
       } else {
         const parentBody = data.parent ? bodyMap.get(data.parent).body : null;
         const body = createCelestialBody(data, parentBody);
@@ -166,24 +166,18 @@ export default function SolarSystemScene() {
 
   function createCelestialBody(data, parentBody = null) {
     const planet = new THREE.Group();
-    
     if (data.name === "Earth") {
       // Create main Earth sphere
       const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
       const textureLoader = new THREE.TextureLoader();
 
-      const material = data.mat
-        ? new THREE.MeshPhongMaterial({ map: textureLoader.load(data.mat) })
-        : new THREE.MeshStandardMaterial({ color: data.color });
-        const body = new THREE.Mesh(geometry, material);
-      
       // Base Earth material
       const earthMaterial = new THREE.MeshPhongMaterial({
         map: textureLoader.load(data.mat),
       });
       const earthMesh = new THREE.Mesh(geometry, earthMaterial);
       planet.add(earthMesh);
-  
+
       // Night lights layer
       const earthLightMaterial = new THREE.MeshBasicMaterial({
         map: textureLoader.load(data.night),
@@ -194,7 +188,7 @@ export default function SolarSystemScene() {
       });
       const earthLightMesh = new THREE.Mesh(geometry, earthLightMaterial);
       planet.add(earthLightMesh);
-  
+
       // Cloud layer
       const cloudMaterial = new THREE.MeshPhongMaterial({
         map: textureLoader.load(data.clouds),
@@ -204,25 +198,26 @@ export default function SolarSystemScene() {
       const cloudMesh = new THREE.Mesh(geometry, cloudMaterial);
       cloudMesh.scale.setScalar(1.0075); // Slightly larger than Earth
       planet.add(cloudMesh);
-  
+
       // Atmosphere layer
       const atmosMaterial = new THREE.MeshLambertMaterial({
-        color: 0x1F9FFF,
+        color: 0x1f9fff,
         transparent: true,
         opacity: 0.3,
       });
       const atmosMesh = new THREE.Mesh(geometry, atmosMaterial);
       atmosMesh.scale.setScalar(1.02); // Larger than clouds
       planet.add(atmosMesh);
-  
     } else {
       // Create other celestial bodies as before
       const geometry = new THREE.SphereGeometry(data.radius, 50, 50);
-      const material = new THREE.MeshStandardMaterial({ color: data.color });
+      const material = data.mat
+        ? new THREE.MeshPhongMaterial({ map: textureLoader.load(data.mat) })
+        : new THREE.MeshStandardMaterial({ color: data.color });
       const body = new THREE.Mesh(geometry, material);
       planet.add(body);
     }
-  
+
     // Create orbit
     const orbitGeometry = new THREE.BufferGeometry();
     const orbitMaterial = new THREE.LineBasicMaterial({
@@ -238,11 +233,11 @@ export default function SolarSystemScene() {
         orbitPoints.push(position);
       }
     }
-  
+
     if (orbitPoints.length > 0) {
       orbitGeometry.setFromPoints(orbitPoints);
       const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
-  
+
       if (parentBody) {
         parentBody.add(planet);
         parentBody.add(orbit);
@@ -250,7 +245,7 @@ export default function SolarSystemScene() {
         sceneRef.current.add(planet);
         sceneRef.current.add(orbit);
       }
-  
+
       return { body: planet, orbit, ...data };
     } else {
       console.warn(`Failed to create orbit for ${data.name}`);
