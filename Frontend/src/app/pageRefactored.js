@@ -18,19 +18,20 @@ export default function SolarSystemScene() {
   const clockRef = useRef(new THREE.Clock());
 
   const speedRef = useRef(1);
-  const orbitalSpeedMultiplierRef = useRef(16);
+  const orbitalSpeedMultiplierRef = useRef(20);
   const distanceScaleRef = useRef(0.01);
   const selectedBodyRef = useRef(null);
   const selectedBodySpeedRef = useRef(1);
 
   const [uiSpeed, setUiSpeed] = useState(1);
-  const [uiOrbitalSpeedMultiplier, setUiOrbitalSpeedMultiplier] = useState(16);
-  const [uiDistanceScale, setUiDistanceScale] = useState(0.01);
+  const [uiOrbitalSpeedMultiplier, setUiOrbitalSpeedMultiplier] = useState(20);
+  // const [uiDistanceScale, setUiDistanceScale] = useState(0.01);
   const [uiSelectedBody, setUiSelectedBody] = useState(null);
 
   const composerRef = useRef(null);
 
   useEffect(() => {
+    // * Scene properties
     const currentMount = mountRef.current;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
@@ -43,17 +44,21 @@ export default function SolarSystemScene() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     currentMount.appendChild(renderer.domElement);
 
+    // * Camera controllers
     const controls = new OrbitControls(camera, renderer.domElement);
-
-    // Enable damping for smoothness
+    controls.minPolarAngle = -Infinity;
+    controls.maxPolarAngle = Infinity;
+    // Disable azimuthal angle limits for infinite horizontal rotation
+    controls.minAzimuthAngle = -Infinity;
+    controls.maxAzimuthAngle = Infinity;
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+    // Zoom
+    controls.minDistance = 42;
+    controls.maxDistance = 50000;
+    controls.enablePan = true;
 
-    // Optional: Set the zoom restrictions
-    controls.minDistance = 42;    // Minimum zoom distance
-    controls.maxDistance = 50000; // Maximum zoom distance
-
-    // Set up bloom effect
+    // * Sun light and bloom
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
       1.5,
@@ -61,11 +66,12 @@ export default function SolarSystemScene() {
       0.85
     );
     bloomPass.threshold = 0;
-    bloomPass.strength = 2;  // Increased for stronger bloom
+    bloomPass.strength = 2;
     bloomPass.radius = 1;
 
     const pointLight = new THREE.PointLight(0xFFF5E1, 10000, 999999999999999);
     scene.add(pointLight);
+
 
     const composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene, camera);
@@ -78,11 +84,9 @@ export default function SolarSystemScene() {
     controlsRef.current = controls;
     composerRef.current = composer;
 
+    // TODO: Add a smooth camera zoom effect on opening the project.
 
-    // Add skybox
     addSkybox();
-
-    // Create celestial bodies
     createCelestialBodies();
 
     // Set initial camera position
@@ -113,7 +117,7 @@ export default function SolarSystemScene() {
       window.removeEventListener("click", onMouseClick);
       currentMount.removeChild(renderer.domElement);
     };
-  }, []);
+  })
 
   function addSkybox() {
     const loader = new THREE.CubeTextureLoader();
@@ -136,13 +140,12 @@ export default function SolarSystemScene() {
         const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
         const material = new THREE.MeshBasicMaterial({
           color: 0xFFF5E1,
-          // color: 0xFFD700,
+          // ! color: 0xFFD700, // Yellow tint
           emissive: 0xFFD700,
           emissiveIntensity: 1,
         });
         const sun = new THREE.Mesh(geometry, material);
         sceneRef.current.add(sun);
-
         bodiesRef.current.push({ body: sun, ...data });
         bodyMap.set(data.name, { body: sun, ...data });
       } else if (data.name === "Earth") {
@@ -157,82 +160,58 @@ export default function SolarSystemScene() {
         bodyMap.set(data.name, body);
       }
     });
-  }
 
-  function createCelestialBody(
-    data,
-    parentBody = null,
-    isThereTexture = false
-  ) {
-    const geometry = new THREE.SphereGeometry(data.radius, 50, 50);
-    const textureLoader = new THREE.TextureLoader();
-    const material = isThereTexture
-      ? new THREE.MeshPhongMaterial({ map: textureLoader.load(data.mat) })
-      : new THREE.MeshStandardMaterial({ color: data.color });
-    const body = new THREE.Mesh(geometry, material);
+    function createCelestialBody(
+      data,
+      parentBody = null,
+      isThereTexture = false
+    ) {
+      const geometry = new THREE.SphereGeometry(data.radius, 50, 50);
+      const textureLoader = new THREE.TextureLoader();
+      const material = isThereTexture
+        ? new THREE.MeshPhongMaterial({ map: textureLoader.load(data.mat) })
+        : new THREE.MeshStandardMaterial({ color: data.color });
+      const body = new THREE.Mesh(geometry, material);
 
-    const orbitGeometry = new THREE.BufferGeometry();
-    const orbitMaterial = new THREE.LineBasicMaterial({
-      color: 0x606060,
-      transparent: true,
-      opacity: 0.1,
-    });
-    const orbitPoints = [];
-    for (let i = 0; i <= 360; i++) {
-      const t = data.epoch + (i / 360) * data.period * 365.25;
-      const position = calculateOrbitPosition(data, t);
-      if (position && position instanceof THREE.Vector3) {
-        orbitPoints.push(position);
-      }
-    }
-
-    if (orbitPoints.length > 0) {
-      orbitGeometry.setFromPoints(orbitPoints);
-      const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
-
-      if (parentBody) {
-        parentBody.add(body);
-        parentBody.add(orbit);
-      } else {
-        sceneRef.current.add(body);
-        sceneRef.current.add(orbit);
-      }
-
-      return { body, orbit, ...data };
-    } else {
-      console.warn(`Failed to create orbit for ${data.name}`);
-      if (parentBody) {
-        parentBody.add(body);
-      } else {
-        sceneRef.current.add(body);
-      }
-      return { body, ...data };
-    }
-  }
-
-  function updateBodiesPositions(elapsedTime) {
-    bodiesRef.current.forEach((bodyData) => {
-      if (bodyData.name === "Sun") return;
-
-      const bodySpeed =
-        bodyData.name === selectedBodyRef.current
-          ? selectedBodySpeedRef.current
-          : 1;
-      const position = calculateOrbitPosition(
-        bodyData,
-        bodyData.epoch + elapsedTime * bodySpeed
-      );
-
-      if (position && position instanceof THREE.Vector3) {
-        if (bodyData.parent) {
-          bodyData.body.position.copy(position);
-        } else {
-          bodyData.body.position.copy(position);
+      const orbitGeometry = new THREE.BufferGeometry();
+      const orbitMaterial = new THREE.LineBasicMaterial({
+        color: 0x606060,
+        transparent: true,
+        opacity: 0.1,
+      });
+      const orbitPoints = [];
+      for (let i = 0; i <= 360; i++) {
+        const t = data.epoch + (i / 360) * data.period * 365.25;
+        const position = calculateOrbitPosition(data, t);
+        if (position && position instanceof THREE.Vector3) {
+          orbitPoints.push(position);
         }
       }
-    });
-  }
 
+      if (orbitPoints.length > 0) {
+        orbitGeometry.setFromPoints(orbitPoints);
+        const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
+
+        if (parentBody) {
+          parentBody.add(body);
+          parentBody.add(orbit);
+        } else {
+          sceneRef.current.add(body);
+          sceneRef.current.add(orbit);
+        }
+
+        return { body, orbit, ...data };
+      } else {
+        console.warn(`Failed to create orbit for ${data.name}`);
+        if (parentBody) {
+          parentBody.add(body);
+        } else {
+          sceneRef.current.add(body);
+        }
+        return { body, ...data };
+      }
+    }
+  }
   function calculateOrbitPosition(body, t) {
     const n = (2 * Math.PI) / (body.period * 365.25); // Mean motion
     const M = degToRad(body.M0) + n * (t - body.epoch);
@@ -484,3 +463,6 @@ export default function SolarSystemScene() {
     </div>
   );
 }
+
+
+
