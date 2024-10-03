@@ -2,7 +2,7 @@
 import React from 'react';
 import celestialBodies from './celestialBodies'; 
 
-const PlanetDescription = ({ selectedBody, onClose }) => {
+const PlanetDescription = ({ selectedBody, onClose, path }) => {
 if (!selectedBody) return null;
 
 const bodyData = celestialBodies.find(body => body.name.toLowerCase() === selectedBody.toLowerCase());
@@ -18,7 +18,7 @@ return (
     <h2 className="text-4xl font-bold mb-4 mt-4">{bodyData.name}</h2>
     <p className="text-md mb-4">{bodyData.type}</p>
     <img 
-    src={`${window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : ""}/assets/Dimgs/${bodyData.name.toLowerCase()}.jpg`} 
+    src={`${path}/assets/Dimgs/${bodyData.name.toLowerCase()}.jpg`} 
     alt={bodyData.name} 
     className="w-full h-44 object-cover rounded-lg mb-4"
     />

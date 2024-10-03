@@ -9,13 +9,26 @@ import { gsap } from "gsap";
 import celestialBodies from "./celestialBodies.js";
 import PlanetDescription from './description'; 
 
+// const useTexturePath = () => {
+//   const [texturePath, setTexturePath] = useState(() => {
+//     return window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "";
+//   });
+
+//   useEffect(() => {
+//     console.log(texturePath)
+//     setTexturePath(window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "");
+//   }, []); 
+
+//   return texturePath;
+// };
+
 export default function SolarSystemScene() {
-  const texturePath = window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "";
+
+
+  //const texturePath = useTexturePath();
+  const texturePath = "/orbit";
   const textureRef = useRef(null)
-  // const texturePath = useRef(
-  //   window.location.hostname == "localhost" ? "" : "/orbit"
-  // );
-  // setTexturePath();
+
   
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
@@ -537,6 +550,7 @@ export default function SolarSystemScene() {
         <PlanetDescription 
           selectedBody={uiSelectedBody} 
           onClose={handleCloseDescription} 
+          path={texturePath}
         />
 
       )}
