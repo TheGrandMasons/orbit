@@ -19,9 +19,11 @@
 6. The period is given in years.
 */
 const celestialBodies = [
-  { name: "Sun", radius: 15, color: 0xffff00, mass: 1.989e30 },
+  { name: "Sun", radius: 15, color: 0xffff00, mass: 1.989e30, description: 'The Sun is the star at the center of the Solar System.' },
+
   {
     name: "Mercury",
+    type: "Planet",
     radius: 3,
     color: 0x8c7853,
     mat: "/assets/M.jpg",
@@ -33,13 +35,18 @@ const celestialBodies = [
     M0: 174.8,
     epoch: 2451545.0,
     period: 0.241,
+    description: 'Mercury is the closest planet to the Sun and the smallest in the Solar System.',
+    LoY: 88, // length of year in Earth days
+    moons: 0,
+    DoS: 0.39, // distance to the Sun in AU
   },
+
   {
     name: "Venus",
     radius: 4,
     color: 0xffd700,
     mat: "/assets/V.jpg",
-    a: 72.3,
+    a: 65,
     e: 0.007,
     i: 3.4,
     omega: 76.7,
@@ -47,7 +54,12 @@ const celestialBodies = [
     M0: 50.4,
     epoch: 2451545.0,
     period: 0.615,
+    description: 'Venus is the second planet from the Sun and is similar in structure to Earth.',
+    LoY: 225,
+    moons: 0,
+    DoS: 0.72,
   },
+
   {
     name: "Earth",
     radius: 4,
@@ -63,7 +75,12 @@ const celestialBodies = [
     M0: 357.5,
     epoch: 2451545.0,
     period: 1.0,
+    description: 'Earth is the third planet from the Sun and the only astronomical object known to support life.',
+    LoY: 365,
+    moons: 1,
+    DoS: 1.0,
   },
+
   {
     name: "Moon",
     radius: 1.5,
@@ -78,7 +95,12 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.0748,
     parent: "Earth",
+    description: 'The Moon is Earth’s only natural satellite and the fifth largest moon in the Solar System.',
+    LoY: 27.3, // length of year in Earth days
+    moons: 0,
+    DoS: 0.00257, // distance to Earth in AU
   },
+
   {
     name: "Mars",
     radius: 3.5,
@@ -92,7 +114,12 @@ const celestialBodies = [
     M0: 19.4,
     epoch: 2451545.0,
     period: 1.881,
+    description: 'Mars is the fourth planet from the Sun and is known as the Red Planet.',
+    LoY: 687,
+    moons: 2,
+    DoS: 1.52,
   },
+
   {
     name: "Jupiter",
     radius: 11,
@@ -106,7 +133,12 @@ const celestialBodies = [
     M0: 20.0,
     epoch: 2451545.0,
     period: 11.86,
+    description: 'Jupiter is the largest planet in the Solar System and is known for its Great Red Spot.',
+    LoY: 4333,
+    moons: 79,
+    DoS: 5.2,
   },
+
   {
     name: "Io",
     radius: 2,
@@ -120,7 +152,12 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.00485,
     parent: "Jupiter",
+    description: 'Io is the most volcanically active body in the Solar System and one of Jupiter’s moons.',
+    LoY: 1.8, // length of year in Earth days
+    moons: 0,
+    DoS: 0.000249, // distance to Jupiter in AU
   },
+
   {
     name: "Europa",
     radius: 1.8,
@@ -134,7 +171,12 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.00972,
     parent: "Jupiter",
+    description: 'Europa is known for its smooth ice-covered surface and is considered a candidate for extraterrestrial life.',
+    LoY: 3.5,
+    moons: 0,
+    DoS: 0.00033,
   },
+
   {
     name: "Saturn",
     radius: 9,
@@ -148,7 +190,12 @@ const celestialBodies = [
     M0: 317.0,
     epoch: 2451545.0,
     period: 29.46,
+    description: 'Saturn is known for its prominent ring system and is the second-largest planet in the Solar System.',
+    LoY: 10759,
+    moons: 82,
+    DoS: 9.58,
   },
+
   {
     name: "Titan",
     radius: 2.4,
@@ -162,7 +209,12 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.0437,
     parent: "Saturn",
+    description: 'Titan is the largest moon of Saturn and is known for its thick atmosphere and surface lakes of liquid methane.',
+    LoY: 15.9, // length of year in Earth days
+    moons: 0,
+    DoS: 0.000842,
   },
+
   {
     name: "Uranus",
     radius: 6,
@@ -176,7 +228,12 @@ const celestialBodies = [
     M0: 142.2,
     epoch: 2451545.0,
     period: 84.01,
+    description: 'Uranus is known for its unique blue color and its rotation on its side.',
+    LoY: 30687,
+    moons: 27,
+    DoS: 19.22,
   },
+
   {
     name: "Neptune",
     radius: 5.8,
@@ -190,7 +247,12 @@ const celestialBodies = [
     M0: 256.2,
     epoch: 2451545.0,
     period: 164.79,
+    description: 'Neptune is the eighth and farthest planet from the Sun, known for its strong winds.',
+    LoY: 60190,
+    moons: 14,
+    DoS: 30.07,
   },
+
   {
     name: "Ganymede",
     radius: 2.2,
@@ -203,7 +265,7 @@ const celestialBodies = [
     M0: 317.54,
     epoch: 2451545.0,
     period: 0.01962,
-    parent: "Jupiter",
+    parent: "Jupiter"
   },
   {
     name: "Callisto",

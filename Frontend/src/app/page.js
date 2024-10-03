@@ -7,9 +7,10 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 import { gsap } from "gsap";
 import celestialBodies from "./celestialBodies.js";
+import PlanetDescription from './description'; 
 
 export default function SolarSystemScene() {
-  const texturePath = "/orbit";
+  const texturePath = "../";
   const textureRef = useRef(null)
   // const texturePath = useRef(
   //   window.location.hostname == "localhost" ? "" : "/orbit"
@@ -456,14 +457,32 @@ export default function SolarSystemScene() {
     // You may want to update the positions of the bodies here based on the new distance scale
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setUiSelectedBody(null); 
+        selectedBodyRef.current = null;
+        resetOrbitVisibility();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+    const handleCloseDescription = () => {
+    setUiSelectedBody(null); 
+  };
+
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
       <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
       <div
         style={{
           position: "absolute",
-          bottom: "20px",
-          left: "20px",
+          top: "20px",
+          right: "20px",
           background: "rgba(0,0,0,0.5)",
           padding: "10px",
           borderRadius: "5px",
@@ -513,21 +532,15 @@ export default function SolarSystemScene() {
           style={{ width: "200px" }}
         />
       </div>
+      <div>
       {uiSelectedBody && (
-        <div
-          style={{
-            position: "absolute",
-            top: "20px",
-            left: "20px",
-            background: "rgba(0,0,0,0.5)",
-            padding: "10px",
-            borderRadius: "5px",
-            color: "white",
-          }}
-        >
-          Selected: {uiSelectedBody}
-        </div>
+        <PlanetDescription 
+          selectedBody={uiSelectedBody} 
+          onClose={handleCloseDescription} 
+        />
+
       )}
+    </div>
     </div>
   );
 }

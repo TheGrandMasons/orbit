@@ -37,3 +37,8 @@
 
 # Mason's Shit
 /Shit
+node_modules
+
+#windows autism - build is diff on w11
+/.next
+/.vscode
