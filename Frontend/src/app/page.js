@@ -10,7 +10,7 @@ import celestialBodies from "./celestialBodies.js";
 import PlanetDescription from './description'; 
 
 export default function SolarSystemScene() {
-  const texturePath = "/orbit";
+  const texturePath = window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "";
   const textureRef = useRef(null)
   // const texturePath = useRef(
   //   window.location.hostname == "localhost" ? "" : "/orbit"
