@@ -10,7 +10,7 @@ import celestialBodies from "./celestialBodies.js";
 import PlanetDescription from './description'; 
 
 export default function SolarSystemScene() {
-  const texturePath = "../";
+  const texturePath = "/orbit";
   const textureRef = useRef(null)
   // const texturePath = useRef(
   //   window.location.hostname == "localhost" ? "" : "/orbit"
