@@ -23,7 +23,7 @@ import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRe
 // };
 
 export default function SolarSystemScene() {
-  const texturePath = '';
+  const texturePath = '/orbit';
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
