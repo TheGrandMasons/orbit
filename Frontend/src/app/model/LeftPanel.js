@@ -9,12 +9,10 @@ const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 const LeftPanel = ({ selectedBody, onClose, path }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    console.log(API_KEY); // This is for testing, remove in production
-  }, []);
+  console.log("secret key :: ", API_KEY);
 
   const genAI = new GoogleGenerativeAI(API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -23,7 +21,7 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
   useEffect(() => {
     setIsChatOpen(false);
     setMessages([]);
-    setInputMessage('');
+    setInputMessage("");
   }, [selectedBody]);
 
   const scrollToBottom = () => {
@@ -36,7 +34,9 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
 
   if (!selectedBody) return null;
 
-  const bodyData = celestialBodies.find(body => body.name.toLowerCase() === selectedBody.toLowerCase());
+  const bodyData = celestialBodies.find(
+    (body) => body.name.toLowerCase() === selectedBody.toLowerCase()
+  );
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -44,31 +44,41 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
 
     const newMessages = [
       ...messages,
-      { type: 'user', content: inputMessage, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+      {
+        type: "user",
+        content: inputMessage,
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      },
     ];
 
     setMessages(newMessages);
-    setInputMessage('');
+    setInputMessage("");
 
     // AI Model interaction
     try {
       const prompt = `Provide information about ${bodyData.name}. User asked: "${inputMessage}" without using markdown rules / stars.`;
       const result = await model.generateContent(prompt);
-      
+
       const aiResponseMessage = {
-        type: 'ai',
+        type: "ai",
         content: result.response.text(), // Adjust this line according to the API response
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
       };
 
-      setMessages(prevMessages => [...prevMessages, aiResponseMessage]);
+      setMessages((prevMessages) => [...prevMessages, aiResponseMessage]);
     } catch (error) {
       console.error("Error fetching AI response:", error);
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage(e);
     }
@@ -79,10 +89,10 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
   };
 
   return (
-    <div 
+    <div
       onClick={handlePanelClick}
       className={`absolute top-0 left-0 h-full bg-black bg-opacity-50 text-white overflow-hidden transition-all duration-300 ease-in-out ${
-        isChatOpen ? 'w-[40%]' : 'w-[26.9%]'
+        isChatOpen ? "w-[40%]" : "w-[26.9%]"
       }`}
     >
       <button
@@ -95,7 +105,11 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
         ✕
       </button>
 
-      <div className={`transition-all duration-300 p-6 ${isChatOpen ? 'h-[45%]' : 'h-[calc(100%-80px)]'} overflow-y-auto `}>
+      <div
+        className={`transition-all duration-300 p-6 ${
+          isChatOpen ? "h-[45%]" : "h-[calc(100%-80px)]"
+        } overflow-y-auto `}
+      >
         <h2 className="text-4xl font-bold mb-4 mt-4">{bodyData.name}</h2>
         <p className="text-md mb-4">{bodyData.type}</p>
         <img
@@ -124,7 +138,7 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
 
       {!isChatOpen && (
         <div className="absolute bottom-6 left-6 right-6">
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               setIsChatOpen(true);
@@ -137,29 +151,40 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
       )}
 
       {isChatOpen && (
-        <div 
+        <div
           onClick={(e) => e.stopPropagation()}
           className="absolute bottom-0 left-0 right-0 h-[55%] bg-[#151510] opacity-75 backdrop-blur-sm"
         >
           <div className="flex flex-col h-full">
             <div className="p-4 border-b border-gray-700">
-              <h3 className="text-lg font-semibold">Chat with AI about {bodyData.name}</h3>
+              <h3 className="text-lg font-semibold">
+                Chat with AI about {bodyData.name}
+              </h3>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${
+                    message.type === "user" ? "justify-end" : "justify-start"
+                  }`}
                 >
-                  <div className={`max-w-[80%] ${message.type === 'user' ? 'order-2' : 'order-1'}`}>
-                    <div className={`
+                  <div
+                    className={`max-w-[80%] ${
+                      message.type === "user" ? "order-2" : "order-1"
+                    }`}
+                  >
+                    <div
+                      className={`
                       relative px-4 py-2 rounded-2xl
-                      ${message.type === 'user' 
-                        ? `bg-blue-700 text-white rounded-br-none`
-                        : 'bg-gray-800 text-white rounded-bl-none'
+                      ${
+                        message.type === "user"
+                          ? `bg-blue-700 text-white rounded-br-none`
+                          : "bg-gray-800 text-white rounded-bl-none"
                       }
-                    `}>
+                    `}
+                    >
                       {message.content}
                       <span className="block text-xs text-gray-400 mt-1">
                         {message.timestamp}
@@ -171,7 +196,10 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
               <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-900">
+            <form
+              onSubmit={handleSendMessage}
+              className="p-4 border-t border-gray-900"
+            >
               <div className="flex items-center gap-2 bg-gray-500/35 rounded-lg p-2">
                 <textarea
                   value={inputMessage}
