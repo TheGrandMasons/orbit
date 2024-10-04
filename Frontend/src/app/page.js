@@ -24,7 +24,8 @@ const LandingPage = () => {
         end: "+=1000",
         scrub: 0.5,
         onUpdate: () => {
-          router.push("/model");
+          // router.push("/model");
+          window.location.href = "/model";
         },
       },
     });
