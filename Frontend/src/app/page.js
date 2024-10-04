@@ -25,7 +25,7 @@ const LandingPage = () => {
         scrub: 0.5,
         onUpdate: () => {
           // router.push("/model");
-          window.location.href = "/model";
+          window.location.href = `/orbit/model`;
         },
       },
     });
