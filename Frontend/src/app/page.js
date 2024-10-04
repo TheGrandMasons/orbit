@@ -7,37 +7,34 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 import { gsap } from "gsap";
 import celestialBodies from "./celestialBodies.js";
-import PlanetDescription from './description'; 
+import PlanetDescription from './description.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-// const useTexturePath = () => {
-//   const [texturePath, setTexturePath] = useState(() => {
-//     return window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "";
-//   });
+const useTexturePath = () => {
+  const [texturePath, setTexturePath] = useState(() => {
+    return window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "";
+  });
 
-//   useEffect(() => {
-//     console.log(texturePath)
-//     setTexturePath(window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "");
-//   }, []); 
+  useEffect(() => {
+    setTexturePath(window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "");
+  }, []);
 
-//   return texturePath;
-// };
+  return texturePath;
+};
 
 export default function SolarSystemScene() {
-
-
-  //const texturePath = useTexturePath();
-  const texturePath = "/orbit";
-  const textureRef = useRef(null)
-
-  
+  const texturePath = useTexturePath();
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
   const rendererRef = useRef(null);
+  const labelRendererRef = useRef(null);
   const controlsRef = useRef(null);
   const bodiesRef = useRef([]);
   const clockRef = useRef(new THREE.Clock());
   const mainObjRef = useRef(null);
+  const raycasterRef = useRef(new THREE.Raycaster());
+  const mouseRef = useRef(new THREE.Vector2());
 
   const speedRef = useRef(1);
   const orbitalSpeedMultiplierRef = useRef(16);
@@ -55,38 +52,33 @@ export default function SolarSystemScene() {
   useEffect(() => {
     const currentMount = mountRef.current;
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000000
-    );
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     currentMount.appendChild(renderer.domElement);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    currentMount.appendChild(labelRenderer.domElement);
 
-    // Enable damping for smoothness
+    const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+    controls.minDistance = 21;
+    controls.maxDistance = 50000;
 
-    // Optional: Set the zoom restrictions
-    controls.minDistance = 21; // Minimum zoom distance
-    controls.maxDistance = 50000; // Maximum zoom distance
-
-    // Set up bloom effect
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      1.5,
-      0.4,
-      0.85
+      1.5, 0.4, 0.85
     );
     bloomPass.threshold = 0;
-    bloomPass.strength = 2; // Increased for stronger bloom
+    bloomPass.strength = 2;
     bloomPass.radius = 1;
 
-    const pointLight = new THREE.PointLight(0xfff5e1, 10000, 999999999999999);
+    const pointLight = new THREE.PointLight(0x222222, 1000000, 999);
     scene.add(pointLight);
 
     const composer = new EffectComposer(renderer);
@@ -97,45 +89,41 @@ export default function SolarSystemScene() {
     sceneRef.current = scene;
     cameraRef.current = camera;
     rendererRef.current = renderer;
+    labelRendererRef.current = labelRenderer;
     controlsRef.current = controls;
     composerRef.current = composer;
 
-    // Add skybox
     addSkybox();
-
-    // Create celestial bodies
     createCelestialBodies();
 
-    // Set initial camera position
     camera.position.set(0, 200, 200);
     controls.update();
 
     function animate() {
       requestAnimationFrame(animate);
-      const elapsedTime =
-        clockRef.current.getElapsedTime() *
-        speedRef.current *
-        orbitalSpeedMultiplierRef.current;
+      const elapsedTime = clockRef.current.getElapsedTime() * speedRef.current * orbitalSpeedMultiplierRef.current;
       updateBodiesPositions(elapsedTime);
-
+      
       if (mainObjRef.current) {
         controlsRef.current.target.copy(mainObjRef.current.body.position);
       }
 
       controlsRef.current.update();
       composerRef.current.render();
+      labelRenderer.render(scene, camera);
     }
     animate();
 
-    // Event listeners
     window.addEventListener("resize", onWindowResize);
     window.addEventListener("click", onMouseClick);
+    window.addEventListener("mousemove", onMouseMove);
 
-    // Cleanup
     return () => {
       window.removeEventListener("resize", onWindowResize);
       window.removeEventListener("click", onMouseClick);
+      window.removeEventListener("mousemove", onMouseMove);
       currentMount.removeChild(renderer.domElement);
+      currentMount.removeChild(labelRenderer.domElement);
     };
   }, []);
 
@@ -154,7 +142,6 @@ export default function SolarSystemScene() {
 
   function createCelestialBodies() {
     const bodyMap = new Map();
-
     celestialBodies.forEach((data) => {
       if (data.name === "Sun") {
         const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
@@ -164,9 +151,29 @@ export default function SolarSystemScene() {
           emissiveIntensity: 1,
         });
         const sun = new THREE.Mesh(geometry, material);
+        sun.userData.type = 'selectable';
+        sun.userData.name = data.name;
+        
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'celestial-label';
+        labelDiv.textContent = data.name;
+        labelDiv.style.cssText = `
+          color: ${data.color || '#ffffff'};
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+          font-size: 12px;
+          pointer-events: auto;
+          white-space: nowrap;
+          user-select: none;
+          transition: color 0.3s ease;
+          cursor: pointer;
+          opacity: 1.0;
+        `;
+        const label = new CSS2DObject(labelDiv);
+        label.position.set(0, data.radius * 1.69, 0);
+        sun.add(label);
+        
         sceneRef.current.add(sun);
-
-        bodiesRef.current.push({ body: sun, ...data });
+        bodiesRef.current.push({ body: sun, label: labelDiv, ...data });
         bodyMap.set(data.name, { body: sun, ...data });
       } else {
         const parentBody = data.parent ? bodyMap.get(data.parent).body : null;
@@ -180,20 +187,17 @@ export default function SolarSystemScene() {
   function createCelestialBody(data, parentBody = null) {
     const planet = new THREE.Group();
     const textureLoader = new THREE.TextureLoader();
-    if (data.name === "Earth") {
-      // Create main Earth sphere
-      const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
 
-      // Base Earth material
+    if (data.name === "Earth") {
+      const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
       const earthMaterial = new THREE.MeshPhongMaterial({
-        map: textureLoader.load(`${texturePath + data.mat}`),
+        map: textureLoader.load(`${texturePath}${data.mat}`),
       });
       const earthMesh = new THREE.Mesh(geometry, earthMaterial);
       planet.add(earthMesh);
 
-      // Night lights layer
       const earthLightMaterial = new THREE.MeshBasicMaterial({
-        map: textureLoader.load(`${texturePath + data.night}`),
+        map: textureLoader.load(`${texturePath}${data.night}`),
         blending: THREE.CustomBlending,
         blendEquation: THREE.AddEquation,
         blendSrc: THREE.OneFactor,
@@ -202,76 +206,209 @@ export default function SolarSystemScene() {
       const earthLightMesh = new THREE.Mesh(geometry, earthLightMaterial);
       planet.add(earthLightMesh);
 
-      // Cloud layer
       const cloudMaterial = new THREE.MeshPhongMaterial({
-        map: textureLoader.load(`${texturePath + data.clouds}`),
+        map: textureLoader.load(`${texturePath}${data.clouds}`),
         transparent: true,
         opacity: 0.8,
       });
       const cloudMesh = new THREE.Mesh(geometry, cloudMaterial);
-      cloudMesh.scale.setScalar(1.0075); // Slightly larger than Earth
+      cloudMesh.scale.setScalar(1.0075);
       planet.add(cloudMesh);
 
-      // Atmosphere layer
       const atmosMaterial = new THREE.MeshLambertMaterial({
         color: 0x1f9fff,
         transparent: true,
         opacity: 0.3,
       });
       const atmosMesh = new THREE.Mesh(geometry, atmosMaterial);
-      atmosMesh.scale.setScalar(1.02); // Larger than clouds
+      atmosMesh.scale.setScalar(1.02);
       planet.add(atmosMesh);
     } else {
-      // Create other celestial bodies as before
       const geometry = new THREE.SphereGeometry(data.radius, 50, 50);
       const material = data.mat
         ? new THREE.MeshPhongMaterial({
-            map: textureLoader.load(`${texturePath + data.mat}`),
+            map: textureLoader.load(`${texturePath}${data.mat}`),
+            emissive: new THREE.Color(0x111111),
           })
-        : new THREE.MeshStandardMaterial({ color: data.color });
+        : new THREE.MeshStandardMaterial({
+            color: data.color,
+            emissive: new THREE.Color(0x111111),
+          });
       const body = new THREE.Mesh(geometry, material);
+      body.userData.type = 'selectable';
+      body.userData.name = data.name;
       planet.add(body);
     }
 
-    // Create orbit
-    const orbitGeometry = new THREE.BufferGeometry();
-    const orbitMaterial = new THREE.LineBasicMaterial({
-      color: 0x606060,
-      transparent: true,
-      opacity: 0.1,
-    });
     const orbitPoints = [];
-    for (let i = 0; i <= 360; i++) {
-      const t = data.epoch + (i / 360) * data.period * 365.25;
+    const segments = 128;
+    for (let i = 0; i <= segments; i++) {
+      const t = data.epoch + (i / segments) * data.period * 365.25;
       const position = calculateOrbitPosition(data, t);
-      if (position && position instanceof THREE.Vector3) {
-        orbitPoints.push(position);
-      }
+      if (position) orbitPoints.push(position);
     }
 
     if (orbitPoints.length > 0) {
-      orbitGeometry.setFromPoints(orbitPoints);
+      const orbitGeometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+      const orbitMaterial = new THREE.LineBasicMaterial({
+        color: 0x444444,
+        transparent: true,
+        opacity: 0.369,
+      });
       const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
 
       if (parentBody) {
-        parentBody.add(planet);
         parentBody.add(orbit);
       } else {
-        sceneRef.current.add(planet);
         sceneRef.current.add(orbit);
       }
+      data.orbit = orbit;
+    }
 
-      return { body: planet, orbit, ...data };
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'celestial-label';
+    labelDiv.style.cssText = `
+      color: ${data.color || '#ffffff'};
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: ${data.parent ? '9px' : '12px'};
+      pointer-events: auto;
+      white-space: nowrap;
+      user-select: none;
+      transition: color 0.3s ease;
+      cursor: pointer;
+      opacity: ${data.parent ? '0.35' : '1.0'};
+    `;
+    labelDiv.textContent = data.name;
+
+    const label = new CSS2DObject(labelDiv);
+    label.position.set(0, data.radius * 1.69, 0);
+    planet.add(label);
+
+    if (parentBody) {
+      parentBody.add(planet);
     } else {
-      console.warn(`Failed to create orbit for ${data.name}`);
-      if (parentBody) {
-        parentBody.add(planet);
-      } else {
-        sceneRef.current.add(planet);
+      sceneRef.current.add(planet);
+    }
+
+    return { body: planet, orbit: data.orbit, label: labelDiv, ...data };
+  }
+
+  function findBodyByObject(object) {
+    for (const body of bodiesRef.current) {
+      // Check if the clicked object is the body mesh
+      if (body.body === object) {
+        return body;
       }
-      return { body: planet, ...data };
+      
+      // Check if the clicked object is a child of the body (like labels)
+      if (body.body && body.body.children) {
+        for (const child of body.body.children) {
+          if (child === object || (child.element && child.element === object)) {
+            return body;
+          }
+        }
+      }
+      
+      // Check if the clicked object is the orbit line
+      if (body.orbit && body.orbit === object) {
+        return body;
+      }
+      
+      // Check nested children (for complex bodies like Earth with multiple meshes)
+      if (body.body && body.body.children) {
+        const foundInChildren = body.body.children.find(
+          child => child === object || child.children?.includes(object)
+        );
+        if (foundInChildren) {
+          return body;
+        }
+      }
+    }
+    return null;
+  }
+
+  function handleBodySelect(bodyData) {
+    selectedBodyRef.current = bodyData.name;
+    mainObjRef.current = bodyData;
+    setUiSelectedBody(bodyData.name);
+    updateOrbitVisibility(bodyData);
+    centerCameraOnBody(bodyData);
+  }
+
+  function onMouseMove(event) {
+    mouseRef.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouseRef.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
+    const intersects = raycasterRef.current.intersectObjects(sceneRef.current.children, true);
+
+    let hoveredBody = null;
+    if (intersects.length > 0) {
+      hoveredBody = findBodyByObject(intersects[0].object);
+    }
+
+    bodiesRef.current.forEach((bodyData) => {
+      if (bodyData.label) {
+        if (hoveredBody && hoveredBody.name === bodyData.name) {
+          bodyData.label.style.color = 'rgba(255, 255, 255, 1)';
+          if (bodyData.orbit) bodyData.orbit.material.opacity = 0.6;
+          document.body.style.cursor = 'pointer';
+        } else {
+          bodyData.label.style.color = bodyData.color || 'rgba(255, 255, 255, 0.7)';
+          if (bodyData.orbit && bodyData.name !== selectedBodyRef.current?.name) {
+            bodyData.orbit.material.opacity = 0.3;
+          }
+          document.body.style.cursor = 'auto';
+        }
+      }
+    });
+  }
+
+  function onMouseClick(event) {
+    const camera = cameraRef.current;
+    const scene = sceneRef.current;
+    const mouse = new THREE.Vector2();
+    const raycaster = new THREE.Raycaster();
+  
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  
+    raycaster.setFromCamera(mouse, camera);
+  
+    const intersects = raycaster.intersectObjects(scene.children, true);
+  
+    if (intersects.length > 0) {
+      const clickedBody = findBodyByObject(intersects[0].object);
+      if (clickedBody && !clickedBody.parent) {
+        handleBodySelect(clickedBody);
+      }
+    } else {
+      // Check if we clicked on a label
+      const labelElements = document.getElementsByClassName('celestial-label');
+      for (const labelElement of labelElements) {
+        const rect = labelElement.getBoundingClientRect();
+        if (
+          event.clientX >= rect.left &&
+          event.clientX <= rect.right &&
+          event.clientY >= rect.top &&
+          event.clientY <= rect.bottom
+        ) {
+          const bodyName = labelElement.textContent;
+          const clickedBody = bodiesRef.current.find(body => body.name === bodyName);
+          if (clickedBody && !clickedBody.parent) {
+            handleBodySelect(clickedBody);
+            return;
+          }
+        }
+      }
+      
+      // If we didn't click on a body or label, deselect
+      selectedBodyRef.current = null;
+      setUiSelectedBody(null);
+      resetOrbitVisibility();
     }
   }
+
   function updateBodiesPositions(elapsedTime) {
     bodiesRef.current.forEach((bodyData) => {
       if (bodyData.name === "Sun") return;
@@ -349,69 +486,17 @@ export default function SolarSystemScene() {
     return E;
   }
 
-  function onWindowResize() {
-    const camera = cameraRef.current;
-    const renderer = rendererRef.current;
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    composerRef.current.setSize(window.innerWidth, window.innerHeight);
-  }
-  function onMouseClick(event) {
-    const camera = cameraRef.current;
-    const scene = sceneRef.current;
-    const mouse = new THREE.Vector2();
-    const raycaster = new THREE.Raycaster();
-
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-
-    const intersects = raycaster.intersectObjects(scene.children, true);
-
-    if (intersects.length > 0) {
-      const clickedBody = findBodyByObject(intersects[0].object);
-      if (clickedBody && intersects[0].object.type === "Mesh") {
-        selectedBodyRef.current = clickedBody.name;
-        mainObjRef.current = clickedBody;
-        setUiSelectedBody(clickedBody.name);
-        updateOrbitVisibility(clickedBody);
-        centerCameraOnBody(clickedBody);
-      }
-    } else {
-      selectedBodyRef.current = null;
-      setUiSelectedBody(null);
-      resetOrbitVisibility();
-    }
-  }
-  function findBodyByObject(object) {
-    for (const body of bodiesRef.current) {
-      if (body.body === object || (body.orbit && body.orbit === object)) {
-        return body;
-      }
-      if (
-        body.body.children.find(
-          (child) => child === object || child.children.includes(object)
-        )
-      ) {
-        return body;
-      }
-    }
-    return null;
-  }
-
   function centerCameraOnBody(body) {
     const camera = cameraRef.current;
     const controls = controlsRef.current;
     const target = new THREE.Vector3();
     body.body.getWorldPosition(target);
-
-    const distance = body.radius * 2;
+  
+    const distance = body.radius * 4;
     const endPosition = target
       .clone()
       .add(new THREE.Vector3(distance, distance / 2, distance));
-
+  
     gsap.to(camera.position, {
       duration: 1,
       x: endPosition.x,
@@ -419,7 +504,7 @@ export default function SolarSystemScene() {
       z: endPosition.z,
       onUpdate: () => controls.update(),
     });
-
+  
     gsap.to(controls.target, {
       duration: 1,
       x: target.x,
@@ -446,9 +531,20 @@ export default function SolarSystemScene() {
   function resetOrbitVisibility() {
     bodiesRef.current.forEach((b) => {
       if (b.orbit) {
-        b.orbit.material.opacity = 0.1;
+        b.orbit.material.opacity = 0.3;
       }
     });
+  }
+
+  function onWindowResize() {
+    const camera = cameraRef.current;
+    const renderer = rendererRef.current;
+    const labelRenderer = labelRendererRef.current;
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    composerRef.current.setSize(window.innerWidth, window.innerHeight);
   }
 
   const handleSpeedChange = (e) => {
@@ -467,15 +563,19 @@ export default function SolarSystemScene() {
     const value = parseFloat(e.target.value);
     distanceScaleRef.current = value;
     setUiDistanceScale(value);
-    // You may want to update the positions of the bodies here based on the new distance scale
+  };
+
+  const handleCloseDescription = () => {
+    selectedBodyRef.current = null;
+    mainObjRef.current = null;
+    setUiSelectedBody(null);
+    resetOrbitVisibility();
   };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
-        setUiSelectedBody(null); 
-        selectedBodyRef.current = null;
-        resetOrbitVisibility();
+        handleCloseDescription();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -483,10 +583,6 @@ export default function SolarSystemScene() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
-
-    const handleCloseDescription = () => {
-    setUiSelectedBody(null); 
-  };
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
@@ -545,16 +641,13 @@ export default function SolarSystemScene() {
           style={{ width: "200px" }}
         />
       </div>
-      <div>
       {uiSelectedBody && (
         <PlanetDescription 
           selectedBody={uiSelectedBody} 
-          onClose={handleCloseDescription} 
+          onClose={handleCloseDescription}
           path={texturePath}
         />
-
       )}
-    </div>
     </div>
   );
 }
