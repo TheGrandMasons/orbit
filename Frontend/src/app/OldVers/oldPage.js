@@ -6,8 +6,8 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 import { gsap } from "gsap";
-import celestialBodies from "./celestialBodies.js";
-import LeftPanel from './LeftPanel.js';
+import celestialBodies from "../celestialBodies.js";
+import PlanetDescription from '../LeftPanel.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 // const useTexturePath = () => {
@@ -23,7 +23,7 @@ import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRe
 // };
 
 export default function SolarSystemScene() {
-  const texturePath = '';
+  const texturePath = '/orbit';
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -35,13 +35,13 @@ export default function SolarSystemScene() {
   const mainObjRef = useRef(null);
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
+
   const speedRef = useRef(1);
   const orbitalSpeedMultiplierRef = useRef(16);
   const distanceScaleRef = useRef(0.01);
   const selectedBodyRef = useRef(null);
   const selectedBodySpeedRef = useRef(1);
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false); 
   const [uiSpeed, setUiSpeed] = useState(1);
   const [uiOrbitalSpeedMultiplier, setUiOrbitalSpeedMultiplier] = useState(16);
   const [uiDistanceScale, setUiDistanceScale] = useState(0.01);
@@ -78,11 +78,8 @@ export default function SolarSystemScene() {
     bloomPass.strength = 2;
     bloomPass.radius = 1;
 
-    const pointLight = new THREE.PointLight(0xFFF5E1, 10, 0, 0.5);
+    const pointLight = new THREE.PointLight(0x222222, 1000000, 999);
     scene.add(pointLight);
-
-    const Ambient = new THREE.AmbientLight(0xFFF5E1, 0.01);
-    scene.add(Ambient);
 
     const composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene, camera);
@@ -173,7 +170,8 @@ export default function SolarSystemScene() {
         `;
         const label = new CSS2DObject(labelDiv);
         label.position.set(0, data.radius * 1.69, 0);
-
+        sun.add(label);
+        
         sceneRef.current.add(sun);
         bodiesRef.current.push({ body: sun, label: labelDiv, ...data });
         bodyMap.set(data.name, { body: sun, ...data });
@@ -198,48 +196,14 @@ export default function SolarSystemScene() {
       const earthMesh = new THREE.Mesh(geometry, earthMaterial);
       planet.add(earthMesh);
 
-      const nightMaterial = new THREE.ShaderMaterial({
-        uniforms: {
-          nightTexture: { type: 't', value: textureLoader.load(data.night) },
-          opacity: { type: 'f', value: 1.0 },
-          emissiveStrength: { type: 'f', value: 5.0 }
-      },
-        vertexShader: `
-          varying vec2 vUv;
-          void main() {
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `,
-        fragmentShader: `
-          uniform sampler2D nightTexture;
-          uniform float opacity;
-          uniform float emissiveStrength;  // New uniform to control emissive brightness
-          varying vec2 vUv;
-
-          void main() {
-              // Sample the texture
-              vec4 nightColor = texture2D(nightTexture, vUv);
-              
-              // Calculate brightness (luminance) of the texture color
-              float brightness = dot(nightColor.rgb, vec3(0.299, 0.587, 0.114));
-              
-              // Adjust brightness with emissive strength to simulate emission (glow)
-              vec3 emissiveColor = nightColor.rgb * emissiveStrength;
-              
-              // Final color with increased brightness and opacity control
-              vec4 finalColor = vec4(emissiveColor, brightness * opacity);
-              
-              // Set the final fragment color
-              gl_FragColor = finalColor;
-          }
-        `,
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        
+      const earthLightMaterial = new THREE.MeshBasicMaterial({
+        map: textureLoader.load(`${texturePath}${data.night}`),
+        blending: THREE.CustomBlending,
+        blendEquation: THREE.AddEquation,
+        blendSrc: THREE.OneFactor,
+        blendDst: THREE.SrcAlphaFactor,
       });
-      const earthLightMesh = new THREE.Mesh(geometry, nightMaterial);
-      earthLightMesh.scale.setScalar(1.001);
+      const earthLightMesh = new THREE.Mesh(geometry, earthLightMaterial);
       planet.add(earthLightMesh);
 
       const cloudMaterial = new THREE.MeshPhongMaterial({
@@ -254,56 +218,26 @@ export default function SolarSystemScene() {
       const atmosMaterial = new THREE.MeshLambertMaterial({
         color: 0x1f9fff,
         transparent: true,
-        opacity: 0.1,
+        opacity: 0.3,
       });
       const atmosMesh = new THREE.Mesh(geometry, atmosMaterial);
       atmosMesh.scale.setScalar(1.02);
       planet.add(atmosMesh);
-
-      planet.rotation.x = (1*data.rotation_axes) * Math.PI / 180;
-      planet.rotation.y = (1*-data.rotation_axes) * Math.PI / 180;
     } else {
       const geometry = new THREE.SphereGeometry(data.radius, 50, 50);
       const material = data.mat
         ? new THREE.MeshPhongMaterial({
             map: textureLoader.load(`${texturePath}${data.mat}`),
+            emissive: new THREE.Color(0x111111),
           })
         : new THREE.MeshStandardMaterial({
             color: data.color,
+            emissive: new THREE.Color(0x111111),
           });
       const body = new THREE.Mesh(geometry, material);
       body.userData.type = 'selectable';
       body.userData.name = data.name;
       planet.add(body);
-      planet.rotation.x = (1*data.rotation_axes) * Math.PI / 180;
-      planet.rotation.y = (1*-data.rotation_axes) * Math.PI / 180;
-
-      if (data.ring == true) {
-        const innerRadius = data.radius * 1.4;
-        const outerRadius = data.radius * 2.2;
-        const segments = 64;
-
-        const geometry = new THREE.RingGeometry(innerRadius, outerRadius, segments);
-        const ring_material = data.mat
-        ? new THREE.MeshPhongMaterial({
-            map: textureLoader.load(
-              `${texturePath}${data.ringMat}`
-            ),
-            side:THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.8
-          })
-        : new THREE.MeshStandardMaterial({
-            color: data.color,
-          });
-        ring_material.wrapS = THREE.RepeatWrapping;
-        ring_material.wrapT = THREE.RepeatWrapping;
-        const ring = new THREE.Mesh(geometry, ring_material);
-        ring.rotation.x = (Math.PI / 2) - data.rotation_axes;
-        planet.add(ring);
-      
-        console.log(data.name);
-    }
     }
 
     const orbitPoints = [];
@@ -631,35 +565,11 @@ export default function SolarSystemScene() {
     setUiDistanceScale(value);
   };
 
-  const resetCamera = () => {
-    const camera = cameraRef.current;
-    const controls = controlsRef.current;
-    
-    // Set default camera position
-    gsap.to(camera.position, {
-      duration: 1,
-      x: 0,
-      y: 200,
-      z: 200,
-      onUpdate: () => controls.update(),
-    });
-
-    // Reset controls target to origin
-    gsap.to(controls.target, {
-      duration: 1,
-      x: 0,
-      y: 0,
-      z: 0,
-      onUpdate: () => controls.update(),
-    });
-  };
-
   const handleCloseDescription = () => {
     selectedBodyRef.current = null;
     mainObjRef.current = null;
     setUiSelectedBody(null);
     resetOrbitVisibility();
-    resetCamera();
   };
 
   useEffect(() => {
@@ -674,77 +584,65 @@ export default function SolarSystemScene() {
     };
   }, []);
 
-  const toggleMenu = () => {
-    setIsMenuOpen((prev) => !prev); 
-  };
-
   return (
-    <div>
+    <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
       <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
-      
-      {/* Button to toggle the slider menu */}
-      <button 
-        onClick={toggleMenu}
+      <div
         style={{
           position: "absolute",
-          bottom: "30px",
-          right: "30px",
-          background: "rgba(0,0,0,0.7)",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
+          top: "20px",
+          right: "20px",
+          background: "rgba(0,0,0,0.5)",
           padding: "10px",
-          cursor: "pointer",
+          borderRadius: "5px",
+          color: "white",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-  {isMenuOpen ? 'Hide Controls' : <img src={`${texturePath}/assets/settings.svg`} style={{ width: '30px', height: '30px' }} />}      </button>
-
-      {isMenuOpen && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "60px", // Adjust position as needed
-            right: "20px",
-            background: "rgba(0,0,0,0.5)",
-            padding: "10px",
-            borderRadius: "5px",
-            color: "white",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <label htmlFor="speed-slider">
-            Animation Speed: {uiSpeed.toFixed(1)}x
-          </label>
-          <input
-            id="speed-slider"
-            type="range"
-            min="0"
-            max="5"
-            step="0.1"
-            value={uiSpeed}
-            onChange={handleSpeedChange}
-            style={{ width: "200px" }}
-          />
-          <label htmlFor="orbital-speed-slider">
-            Orbital Speed: {uiOrbitalSpeedMultiplier.toFixed(1)}x
-          </label>
-          <input
-            id="orbital-speed-slider"
-            type="range"
-            min="0.1"
-            max="10"
-            step="0.1"
-            value={uiOrbitalSpeedMultiplier}
-            onChange={handleOrbitalSpeedMultiplierChange}
-            style={{ width: "200px" }}
-          />
-        </div>
-      )}
-
+        <label htmlFor="speed-slider">
+          Animation Speed: {uiSpeed.toFixed(1)}x
+        </label>
+        <input
+          id="speed-slider"
+          type="range"
+          min="0"
+          max="5"
+          step="0.1"
+          value={uiSpeed}
+          onChange={handleSpeedChange}
+          style={{ width: "200px" }}
+        />
+        <label htmlFor="orbital-speed-slider">
+          Orbital Speed: {uiOrbitalSpeedMultiplier.toFixed(1)}x
+        </label>
+        <input
+          id="orbital-speed-slider"
+          type="range"
+          min="0.1"
+          max="10"
+          step="0.1"
+          value={uiOrbitalSpeedMultiplier}
+          onChange={handleOrbitalSpeedMultiplierChange}
+          style={{ width: "200px" }}
+        />
+        <label htmlFor="distance-scale-slider">
+          Distance Scale: {(uiDistanceScale * 100).toFixed(2)}%
+        </label>
+        <input
+          id="distance-scale-slider"
+          type="range"
+          min="0.0002"
+          max="0.01"
+          step="0.0002"
+          value={uiDistanceScale}
+          onChange={handleDistanceScaleChange}
+          style={{ width: "200px" }}
+        />
+      </div>
       {uiSelectedBody && (
-        <LeftPanel 
+        <PlanetDescription 
           selectedBody={uiSelectedBody} 
           onClose={handleCloseDescription}
           path={texturePath}
@@ -752,4 +650,4 @@ export default function SolarSystemScene() {
       )}
     </div>
   );
-};
+}
