@@ -24,8 +24,9 @@ const LandingPage = () => {
         end: "+=1000",
         scrub: 0.5,
         onUpdate: () => {
+          console.log(window.location.pathname);
           // router.push("/model");
-          window.location.href = `/orbit/model`;
+          window.location.href = `${window.location.href}/model`;
         },
       },
     });
