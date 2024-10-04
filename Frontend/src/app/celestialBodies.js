@@ -42,6 +42,7 @@ const celestialBodies = [
     LoY: 88, // length of year in Earth days
     moons: 0,
     DoS: 0.39, // distance to the Sun in AU
+    rotation_axes: 1
   },
 
   {
@@ -61,6 +62,7 @@ const celestialBodies = [
     LoY: 225,
     moons: 0,
     DoS: 0.72,
+    rotation_axes: 1
   },
 
   {
@@ -82,6 +84,7 @@ const celestialBodies = [
     LoY: 365,
     moons: 1,
     DoS: 1.0,
+    rotation_axes: -23.4
   },
 
   {
@@ -102,6 +105,7 @@ const celestialBodies = [
     LoY: 27.3, // length of year in Earth days
     moons: 0,
     DoS: 0.00257, // distance to Earth in AU
+    rotation_axes: 1
   },
 
   {
@@ -121,6 +125,7 @@ const celestialBodies = [
     LoY: 687,
     moons: 2,
     DoS: 1.52,
+    rotation_axes: 1
   },
   
   {
@@ -136,6 +141,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.164,  
     parent: "Mars",
+    rotation_axes: 1
   },  
   {
     name: "Deimos",
@@ -150,6 +156,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 1.262,  
     parent: "Mars",
+    rotation_axes: 1
   },
   {
     name: "Jupiter",
@@ -168,6 +175,7 @@ const celestialBodies = [
     LoY: 4333,
     moons: 79,
     DoS: 5.2,
+    rotation_axes: 1
   },
   {
     name: "Io",
@@ -186,6 +194,7 @@ const celestialBodies = [
     LoY: 1.8,
     moons: 0,
     DoS: 0.000249,
+    rotation_axes: 1
   },
   {
     name: "Europa",
@@ -204,6 +213,7 @@ const celestialBodies = [
     LoY: 3.5,
     moons: 0,
     DoS: 0.00033,
+    rotation_axes: 1
   },
   {
     name: "Ganymede",
@@ -218,6 +228,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 7.155,  // Adjusted to the correct orbital period of Ganymede in days
     parent: "Jupiter",
+    rotation_axes: 1
   },
   {
     name: "Callisto",
@@ -232,6 +243,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 16.689, // Adjusted to the correct orbital period of Callisto in days
     parent: "Jupiter",
+    rotation_axes: 1
   },
 
   {
@@ -239,6 +251,8 @@ const celestialBodies = [
     radius: 9,
     color: 0xffd700,
     mat: "/assets/saturn.jpg",
+    ring: true,
+    ringMat: "/assets/saturn_ring.png",
     a: 953,
     e: 0.054,
     i: 2.5,
@@ -251,6 +265,7 @@ const celestialBodies = [
     LoY: 10759,
     moons: 82,
     DoS: 9.58,
+    rotation_axes: 6.6
   },
 
   {
@@ -269,6 +284,7 @@ const celestialBodies = [
     description: 'Titan is the largest moon of Saturn and is known for its thick atmosphere and surface lakes of liquid methane.',
     LoY: 15.9,
     moons: 0,
+    rotation_axes: 1
 },
 
 {
@@ -284,6 +300,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 4.518,  // Adjusted to the correct orbital period of Rhea in days
     parent: "Saturn",
+    rotation_axes: 1
 },
 
 {
@@ -299,6 +316,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 79.32,  // Adjusted to the correct orbital period of Iapetus in days
     parent: "Saturn",
+    rotation_axes: 1
 },
 
 {
@@ -314,6 +332,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 2.736,  // Adjusted to the correct orbital period of Dione in days
     parent: "Saturn",
+    rotation_axes: 1
 },
 
 {
@@ -329,6 +348,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 1.370,  // Adjusted to the correct orbital period of Enceladus in days
     parent: "Saturn",
+    rotation_axes: 1
 },
 
 {
@@ -344,12 +364,15 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.942,  // Adjusted to the correct orbital period of Mimas in days
     parent: "Saturn",
+    rotation_axes: 1
 },
   {
     name: "Uranus",
     radius: 6,
     color: 0x40e0d0,
     mat: "/assets/uranus.jpg",
+    ringMat: "/assets/uranus_ring.png",
+    ring: true,
     a: 1920,
     e: 0.047,
     i: 0.8,
@@ -362,6 +385,7 @@ const celestialBodies = [
     LoY: 30687,
     moons: 27,
     DoS: 19.22,
+    rotation_axes: 1
   },
   {
     name: "Oberon",
@@ -377,6 +401,7 @@ const celestialBodies = [
     period: 13.46,  // Correct orbital period in days
     parent: "Uranus",
     description: 'Oberon is the second-largest moon of Uranus, known for its heavily cratered surface.',
+    rotation_axes: 1
   },
   {
     name: "Titania",
@@ -392,6 +417,7 @@ const celestialBodies = [
     period: 8.71,  // Correct orbital period in days
     parent: "Uranus",
     description: 'Titania is Uranus’ largest moon, with a mix of valleys and fault lines on its surface.',
+    rotation_axes: 1
   },
   {
     name: "Miranda",
@@ -407,6 +433,7 @@ const celestialBodies = [
     period: 1.41,  // Correct orbital period in days
     parent: "Uranus",
     description: 'Miranda is known for its patchwork of giant fault canyons, terraces, and strange geological features.',
+    rotation_axes: 1
   },
   {
     name: "Ariel",
@@ -422,6 +449,7 @@ const celestialBodies = [
     period: 2.52,  // Correct orbital period in days
     parent: "Uranus",
     description: 'Ariel is the brightest and one of the most geologically active moons of Uranus.',
+    rotation_axes: 1
   },
   {
     name: "Umbriel",
@@ -437,6 +465,7 @@ const celestialBodies = [
     period: 4.14,  // Correct orbital period in days
     parent: "Uranus",
     description: 'Umbriel is the darkest moon of Uranus, covered in ancient craters.',
+    rotation_axes: 1
   },  
   {
     name: "Neptune",
@@ -455,6 +484,7 @@ const celestialBodies = [
     LoY: 60190,
     moons: 14,
     DoS: 30.07,
+    rotation_axes: 1
   },
   {
     name: "Triton",
@@ -470,6 +500,7 @@ const celestialBodies = [
     period: 5.876,  // Correct orbital period in days
     parent: "Neptune",
     description: 'Triton is Neptune’s largest moon, known for its retrograde orbit and active geysers.',
+    rotation_axes: 1
   },
   {
     name: "Proteus",
@@ -485,6 +516,7 @@ const celestialBodies = [
     period: 1.122,  // Correct orbital period in days
     parent: "Neptune",
     description: 'Proteus is the second-largest moon of Neptune and has an irregular shape.',
+    rotation_axes: 1
   },
   {
     name: "Nereid",
@@ -500,6 +532,8 @@ const celestialBodies = [
     period: 360.136,  // Correct orbital period in days
     parent: "Neptune",
     description: 'Nereid has one of the most eccentric orbits of any moon in the Solar System.',
+    rotation_axes: 1
+
   },
   {
     name: "Naiad",
@@ -515,6 +549,7 @@ const celestialBodies = [
     period: 0.294,  // Correct orbital period in days
     parent: "Neptune",
     description: 'Naiad is the innermost of Neptune’s moons and orbits very close to the planet.',
+    rotation_axes: 1
   },
   {
     name: "Larissa",
@@ -530,6 +565,7 @@ const celestialBodies = [
     period: 0.555,  // Correct orbital period in days
     parent: "Neptune",
     description: 'Larissa is a small moon of Neptune, discovered by the Voyager 2 spacecraft.',
+    rotation_axes: 1
   }  
 ];
 

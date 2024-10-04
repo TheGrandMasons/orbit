@@ -6,8 +6,8 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 import { gsap } from "gsap";
-import celestialBodies from "./celestialBodies.js";
-import PlanetDescription from './description.js';
+import celestialBodies from "../celestialBodies.js";
+import PlanetDescription from '../LeftPanel.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 // const useTexturePath = () => {
