@@ -19,11 +19,13 @@
 6. The period is given in years.
 */
 const celestialBodies = [
-  { name: "Sun", radius: 20, color: 0xffff00, mass: 1.989e30 },
+  { name: "Sun", radius: 15, color: 0xffff00, mass: 1.989e30 },
   {
     name: "Mercury",
     radius: 3,
     color: 0x8c7853,
+    mat: "/assets/M.jpg",
+    ring: false,
     a: 38.7,
     e: 0.206,
     i: 7.0,
@@ -32,11 +34,14 @@ const celestialBodies = [
     M0: 174.8,
     epoch: 2451545.0,
     period: 0.241,
+    rotation_axes: 1
   },
   {
     name: "Venus",
     radius: 4,
     color: 0xffd700,
+    mat: "/assets/V.jpg",
+    ring: false,
     a: 72.3,
     e: 0.007,
     i: 3.4,
@@ -45,11 +50,16 @@ const celestialBodies = [
     M0: 50.4,
     epoch: 2451545.0,
     period: 0.615,
+    rotation_axes: 1
   },
   {
     name: "Earth",
     radius: 4,
-    color: 0x0000ff,
+    color: 0x1F9FFF,
+    mat: "/assets/earth.jpg",
+    night: "/assets/earth_night_light.jpg",
+    clouds: "/assets/earth_clouds.jpg",
+    ring: false,
     a: 100,
     e: 0.017,
     i: 0.0,
@@ -58,11 +68,13 @@ const celestialBodies = [
     M0: 357.5,
     epoch: 2451545.0,
     period: 1.0,
+    rotation_axes: -23.4,
   },
   {
     name: "Moon",
     radius: 1.5,
     color: 0xcccccc,
+    mat: "/assets/moon.jpg",
     a: 10,
     e: 0.0549,
     i: 5.145,
@@ -72,11 +84,14 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.0748,
     parent: "Earth",
+    rotation_axes: 1
   },
   {
     name: "Mars",
     radius: 3.5,
     color: 0xff4500,
+    mat: "/assets/mars.jpg",
+    ring: false,
     a: 152,
     e: 0.093,
     i: 1.8,
@@ -85,11 +100,14 @@ const celestialBodies = [
     M0: 19.4,
     epoch: 2451545.0,
     period: 1.881,
+    rotation_axes: 1
   },
   {
     name: "Jupiter",
     radius: 11,
     color: 0xffa500,
+    mat: "/assets/jupiter.jpg",
+    ring: false,
     a: 520,
     e: 0.048,
     i: 1.3,
@@ -98,6 +116,7 @@ const celestialBodies = [
     M0: 20.0,
     epoch: 2451545.0,
     period: 11.86,
+    rotation_axes: 1
   },
   {
     name: "Io",
@@ -112,6 +131,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.00485,
     parent: "Jupiter",
+    rotation_axes: 1
   },
   {
     name: "Europa",
@@ -126,11 +146,15 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.00972,
     parent: "Jupiter",
+    rotation_axes: 1
   },
   {
     name: "Saturn",
     radius: 9,
     color: 0xffd700,
+    mat: "/assets/saturn.jpg",
+    ring: true,
+    ringMat: "/assets/saturn_ring.png",
     a: 953,
     e: 0.054,
     i: 2.5,
@@ -139,6 +163,7 @@ const celestialBodies = [
     M0: 317.0,
     epoch: 2451545.0,
     period: 29.46,
+    rotation_axes: 6.6
   },
   {
     name: "Titan",
@@ -153,11 +178,15 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.0437,
     parent: "Saturn",
+    rotation_axes: 1
   },
   {
     name: "Uranus",
     radius: 6,
     color: 0x40e0d0,
+    mat: "/assets/uranus.jpg",
+    ring: true,
+    ringMat: "/assets/uranus_ring.png",
     a: 1920,
     e: 0.047,
     i: 0.8,
@@ -166,11 +195,14 @@ const celestialBodies = [
     M0: 142.2,
     epoch: 2451545.0,
     period: 84.01,
+    rotation_axes: 1
   },
   {
     name: "Neptune",
     radius: 5.8,
     color: 0x4169e1,
+    mat: "/assets/neptune.jpg",
+    ring: false,
     a: 3007,
     e: 0.009,
     i: 1.8,
@@ -179,6 +211,7 @@ const celestialBodies = [
     M0: 256.2,
     epoch: 2451545.0,
     period: 164.79,
+    rotation_axes: 1
   },
   {
     name: "Ganymede",
@@ -193,6 +226,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.01962,
     parent: "Jupiter",
+    rotation_axes: 1
   },
   {
     name: "Callisto",
@@ -207,6 +241,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.04551,
     parent: "Jupiter",
+    rotation_axes: 1
   },
   {
     name: "Triton",
@@ -221,6 +256,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.01992,
     parent: "Neptune",
+    rotation_axes: 1
   },
   {
     name: "Rhea",
@@ -235,6 +271,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.02852,
     parent: "Saturn",
+    rotation_axes: 1
   },
   {
     name: "Iapetus",
@@ -249,6 +286,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.07952,
     parent: "Saturn",
+    rotation_axes: 1
   },
   {
     name: "Phobos",
@@ -263,6 +301,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.00031,
     parent: "Mars",
+    rotation_axes: 1
   },
   {
     name: "Deimos",
@@ -277,6 +316,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.00126,
     parent: "Mars",
+    rotation_axes: 1
   },
   {
     name: "Oberon",
@@ -291,6 +331,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.08352,
     parent: "Uranus",
+    rotation_axes: 1
   },
   {
     name: "Titania",
@@ -305,6 +346,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.05043,
     parent: "Uranus",
+    rotation_axes: 1
   },
   {
     name: "Miranda",
@@ -319,6 +361,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.01214,
     parent: "Uranus",
+    rotation_axes: 1
   },
   {
     name: "Dione",
@@ -333,6 +376,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.02812,
     parent: "Saturn",
+    rotation_axes: 1
   },
   {
     name: "Ariel",
@@ -347,6 +391,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.02577,
     parent: "Uranus",
+    rotation_axes: 1
   },
   {
     name: "Enceladus",
@@ -361,6 +406,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.01296,
     parent: "Saturn",
+    rotation_axes: 1
   },
   {
     name: "Mimas",
@@ -375,6 +421,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.00985,
     parent: "Saturn",
+    rotation_axes: 1
   },
   {
     name: "Umbriel",
@@ -389,6 +436,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.04642,
     parent: "Uranus",
+    rotation_axes: 1
   },
   {
     name: "Proteus",
@@ -403,6 +451,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.00109,
     parent: "Neptune",
+    rotation_axes: 1
   },
   {
     name: "Nereid",
@@ -417,6 +466,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.36149,
     parent: "Neptune",
+    rotation_axes: 1
   },
   // NEOs
 ];
