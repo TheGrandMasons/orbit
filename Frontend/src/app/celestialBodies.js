@@ -22,7 +22,7 @@
 const outerSSscale= 2.1;
 
 const celestialBodies = [
-  { name: "Sun", radius: 15, color: 0xffff00, mass: 1.989e30, description: 'The Sun is the star at the center of the Solar System.' },
+  { name: "Sun", radius: 15, color: 0xffff00, mass: 1.989e30, description: 'The Sun is a yellow dwarf star, a hot ball of glowing gases at the heart of our solar system. Its gravity holds everything from the biggest planets to tiny debris in its orbit.' },
 
   {
     name: "Mercury",
@@ -38,7 +38,7 @@ const celestialBodies = [
     M0: 174.8,
     epoch: 2451545.0,
     period: 0.241,
-    description: 'Mercury is the closest planet to the Sun and the smallest in the Solar System.',
+    description: "Mercury—the smallest planet in our solar system and closest to the Sun—is only slightly larger than Earth's Moon. Mercury is the fastest planet, zipping around the Sun every 88 Earth days.",
     LoY: 88, // length of year in Earth days
     moons: 0,
     DoS: 0.39, // distance to the Sun in AU
@@ -58,7 +58,7 @@ const celestialBodies = [
     M0: 50.4,
     epoch: 2451545.0,
     period: 0.615,
-    description: 'Venus is the second planet from the Sun and is similar in structure to Earth.',
+    description: 'Venus spins slowly in the opposite direction from most planets. A thick atmosphere traps heat in a runaway greenhouse effect, making it the hottest planet in our solar system.',
     LoY: 225,
     moons: 0,
     DoS: 0.72,
@@ -80,7 +80,7 @@ const celestialBodies = [
     M0: 357.5,
     epoch: 2451545.0,
     period: 1.0,
-    description: 'Earth is the third planet from the Sun and the only astronomical object known to support life.',
+    description: "Earth—our home planet—is the only place we know of so far that’s inhabited by living things. It's also the only planet in our solar system with liquid water on the surface.",
     LoY: 365,
     moons: 1,
     DoS: 1.0,
@@ -101,7 +101,7 @@ const celestialBodies = [
     epoch: 2451545.0,
     period: 0.0748,
     parent: "Earth",
-    description: 'The Moon is Earth’s only natural satellite and the fifth largest moon in the Solar System.',
+    description: "Earth's Moon is the only place beyond Earth where humans have set foot, so far. The Moon makes our planet more livable by moderating how much it wobbles on its axis.",
     LoY: 27.3, // length of year in Earth days
     moons: 0,
     DoS: 0.00257, // distance to Earth in AU
@@ -121,7 +121,7 @@ const celestialBodies = [
     M0: 19.4,
     epoch: 2451545.0,
     period: 1.881,
-    description: 'Mars is the fourth planet from the Sun and is known as the Red Planet.',
+    description: "Mars is a dusty, cold, desert world with a very thin atmosphere. There is strong evidence Mars was—billions of years ago—wetter and warmer, with a thicker atmosphere.",
     LoY: 687,
     moons: 2,
     DoS: 1.52,
@@ -171,7 +171,7 @@ const celestialBodies = [
     M0: 20.0,
     epoch: 2451545.0,
     period: 11.86,
-    description: 'Jupiter is the largest planet in the Solar System and is known for its Great Red Spot.',
+    description: "Jupiter is more than twice as massive than the other planets of our solar system combined. The giant planet's Great Red spot is a centuries-old storm bigger than Earth.",
     LoY: 4333,
     moons: 79,
     DoS: 5.2,
@@ -261,7 +261,7 @@ const celestialBodies = [
     M0: 317.0,
     epoch: 2451545.0,
     period: 29.46,
-    description: 'Saturn is known for its prominent ring system and is the second-largest planet in the Solar System.',
+    description: "Adorned with a dazzling, complex system of icy rings, Saturn is unique in our solar system. The other giant planets have rings, but none are as spectacular as Saturn's.",
     LoY: 10759,
     moons: 82,
     DoS: 9.58,
@@ -381,7 +381,7 @@ const celestialBodies = [
     M0: 142.2,
     epoch: 2451545.0,
     period: 84.01,
-    description: 'Uranus is known for its unique blue color and its rotation on its side.',
+    description: "Uranus—seventh planet from the Sun—rotates at a nearly 90-degree angle from the plane of its orbit. This unique tilt makes Uranus appear to spin on its side.",
     LoY: 30687,
     moons: 27,
     DoS: 19.22,
@@ -480,7 +480,7 @@ const celestialBodies = [
     M0: 256.2,
     epoch: 2451545.0,
     period: 164.79,
-    description: 'Neptune is the eighth and farthest planet from the Sun, known for its strong winds.',
+    description: "Neptune—the eighth and most distant major planet orbiting our Sun—is dark, cold and whipped by supersonic winds. It was the first planet located through mathematical calculations, rather than by telescope.",
     LoY: 60190,
     moons: 14,
     DoS: 30.07,
