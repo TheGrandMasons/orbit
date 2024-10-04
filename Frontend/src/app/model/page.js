@@ -26,7 +26,7 @@ import {
 // };
 
 export default function SolarSystemScene() {
-  const texturePath = "";
+  const texturePath = "/orbit";
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
