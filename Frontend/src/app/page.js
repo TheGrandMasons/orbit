@@ -10,20 +10,20 @@ import celestialBodies from "./celestialBodies.js";
 import PlanetDescription from './description.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-const useTexturePath = () => {
-  const [texturePath, setTexturePath] = useState(() => {
-    return window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "";
-  });
+// const useTexturePath = () => {
+//   const [texturePath, setTexturePath] = useState(() => {
+//     return window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "";
+//   });
 
-  useEffect(() => {
-    setTexturePath(window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "");
-  }, []);
+//   useEffect(() => {
+//     setTexturePath(window.location.hostname === "thegrandmasons.github.io" ? "/orbit" : "");
+//   }, []);
 
-  return texturePath;
-};
+//   return texturePath;
+// };
 
 export default function SolarSystemScene() {
-  const texturePath = useTexturePath();
+  const texturePath = '/orbit';
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
