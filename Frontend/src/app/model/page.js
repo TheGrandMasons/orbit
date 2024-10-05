@@ -30,8 +30,8 @@ import { achievementManager } from "./AchievementManager";
 // };
 
 export default function SolarSystemScene() {
-  const texturePath = "/orbit";
-  // const texturePath = "/";
+  // const texturePath = "/orbit";
+  const texturePath = "/";
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -202,11 +202,26 @@ export default function SolarSystemScene() {
       });
     };
   }
+  // function animate() {
+  //   requestAnimationFrame(animate);
+  //   const elapsedTime =
+  //     clockRef.current.getElapsedTime() *
+  //     speedRef.current *
+  //     orbitalSpeedMultiplierRef.current;
+  //   updateBodiesPositions(elapsedTime);
 
-  // Helper function to calculate orbit position (reuse from your existing code)
-  function calculateOrbitPosition(body, t) {
-    // ... (use your existing implementation)
-  }
+  //   // Add this line to update asteroid positions
+  //   updateAsteroids(elapsedTime);
+
+  //   if (mainObjRef.current) {
+  //     controlsRef.current.target.copy(mainObjRef.current.body.position);
+  //   }
+
+  //   controlsRef.current.update();
+  //   composerRef.current.render();
+  //   labelRenderer.render(scene, camera);
+  // }
+
   function createCelestialBodies() {
     const bodyMap = new Map();
     celestialBodies.forEach((data) => {
