@@ -13,7 +13,7 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    console.log(API_KEY); // This is for testing, remove in production
+    console.log(process.env); // This is for testing, remove in production
   }, []); 
 
   const genAI = new GoogleGenerativeAI(API_KEY);
