@@ -16,17 +16,17 @@ The primary focus of Orbit is to educate users about the threats posed by Near-E
 
 Orbit provides the following key functionalities:
 
-### **2. NEO Management**
+### **1. NEO Management**
 - **NEO Database Integration:** The app is integrated with NASA's **Small Body Database**, fetching up-to-date information on all NEOs, including Potentially Hazardous Asteroids (PHAs).
 - **Real-Time Data Updates:** The backend periodically refreshes the NEO database to keep track of any changes in orbital data or newly discovered NEOs.
 - **Detailed Object Pages:** For every NEO, a detailed page is available showing its Keplerian parameters (e.g., eccentricity, semi-major axis, inclination), visualized with accurate orbital trajectories.
 
-### **3. 3D Visualization with Three.js**
+### **2. 3D Visualization with Three.js**
 - **Interactive Orrery:** A core feature of Orbit is the 3D orrery that allows users to explore the solar system. Built with **Three.js**, this provides real-time orbits, interactive controls (zoom, rotate, pan), and an engaging visualization of celestial movements.
 - **Dynamic Simulation:** Users can control the speed of time, moving forwards or backwards, to see the past and future positions of celestial objects.
 - **Point of View Control:** Users can change their perspective to explore the solar system from different angles or switch to a first-person view for an immersive experience of flying through space.
 
-### **4. Visit Tracking**
+### **3. Visit Tracking**
 - **Session-Based Tracking:** We generate a unique session key for each user visit, enabling us to track and log user behavior and interactions with the platform. This helps in analyzing user patterns and improving the experience based on actual user interaction data.
 - **Historical Tracking:** Users can review their past interactions with the app and revisit objects or timeframes they explored during previous sessions.
 
