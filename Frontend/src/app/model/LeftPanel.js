@@ -12,10 +12,6 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    console.log(API_KEY); // This is for testing, remove in production
-  }, []); 
-
   const genAI = new GoogleGenerativeAI(API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
