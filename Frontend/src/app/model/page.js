@@ -29,7 +29,7 @@ import { achievementManager } from './AchievementManager';
 // };
 
 export default function SolarSystemScene() {
-  const texturePath = "";
+  const texturePath = "/orbit";
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -810,7 +810,7 @@ export default function SolarSystemScene() {
         unlockedAchievements={unlockedAchievements}
         achievements={ACHIEVEMENTS}
       />    
-      
+
 
     </div>
   );
