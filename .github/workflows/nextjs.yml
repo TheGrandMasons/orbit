@@ -38,6 +38,7 @@ jobs:
 
       - name: Create .env file
         run: |
+          cd Frontend
           echo "NEXT_PUBLIC_GEMINI_API_KEY=${{ vars.NEXT_PUBLIC_GEMINI_API_KEY }}" > .env
 
       - name: Build with Next.js
