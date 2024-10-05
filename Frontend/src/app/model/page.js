@@ -30,8 +30,8 @@ import { achievementManager } from "./AchievementManager";
 // };
 
 export default function SolarSystemScene() {
-  const texturePath = "/orbit";
-  // const texturePath = "/";
+  // const texturePath = "/orbit";
+  const texturePath = "";
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -151,6 +151,7 @@ export default function SolarSystemScene() {
 
   function addSkybox() {
     const loader = new THREE.CubeTextureLoader();
+    console.log("bg : ", `${texturePath}/imgs/stars.jpg`);
     const texture = loader.load([
       `${texturePath}/imgs/stars.jpg`,
       `${texturePath}/imgs/stars.jpg`,

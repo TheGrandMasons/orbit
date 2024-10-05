@@ -3,10 +3,13 @@ import React, { useState, useRef, useEffect } from "react";
 import celestialBodies from "./celestialBodies";
 import { SendHorizontal } from "lucide-react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Image from "next/image";
 
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 const LeftPanel = ({ selectedBody, onClose, path }) => {
+  const imgsPath = "";
+  // const imgsPath = "/orbit";
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -110,8 +113,10 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
       >
         <h2 className="text-4xl font-bold mb-4 mt-4">{bodyData.name}</h2>
         <p className="text-md mb-4">{bodyData.type}</p>
-        <img
-          src={`${path}/assets/Dimgs/${bodyData.name.toLowerCase()}.jpg`}
+        <Image
+          width={200}
+          height={200}
+          src={`${imgsPath}/assets/Dimgs/${bodyData.name.toLowerCase()}.jpg`}
           alt={bodyData.name}
           className="w-full h-44 object-cover rounded-lg mb-4"
         />
