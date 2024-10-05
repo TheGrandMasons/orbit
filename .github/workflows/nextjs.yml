@@ -36,6 +36,10 @@ jobs:
           cd Frontend
           bun install
 
+      - name: Create .env file
+        run: |
+          echo "NEXT_PUBLIC_GEMINI_API_KEY=${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}" > .env.local
+
       - name: Build with Next.js
         run: |
           cd Frontend
