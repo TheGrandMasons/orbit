@@ -38,7 +38,7 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
   const bodyData = celestialBodies.find(
     (body) => body.name.toLowerCase() === selectedBody.toLowerCase()
   );
-  console.log(`${imgsPath}/Dimgs/${bodyData.name.toLowerCase()}.jpg`);
+  console.log(`${imgsPath}/DImgs/${bodyData.name.toLowerCase()}.jpg`);
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
@@ -117,7 +117,7 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
         <Image
           width={200}
           height={200}
-          src={`${imgsPath}/assets/Dimgs/${bodyData.name.toLowerCase()}.jpg`}
+          src={`${imgsPath}/DImgs/${bodyData.name.toLowerCase()}.jpg`}
           alt={bodyData.name}
           className="w-full h-44 object-cover rounded-lg mb-4"
         />
