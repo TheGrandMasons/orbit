@@ -8,8 +8,8 @@ import Image from "next/image";
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 const LeftPanel = ({ selectedBody, onClose, path }) => {
-  const imgsPath = "";
-  // const imgsPath = "/orbit";
+  // const imgsPath = "";
+  const imgsPath = "/orbit";
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
