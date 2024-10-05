@@ -38,7 +38,7 @@ const LeftPanel = ({ selectedBody, onClose, path }) => {
   const bodyData = celestialBodies.find(
     (body) => body.name.toLowerCase() === selectedBody.toLowerCase()
   );
-  console.log(`${imgsPath}/assets/Dimgs/${bodyData.name.toLowerCase()}.jpg`);
+  console.log(`${imgsPath}/Dimgs/${bodyData.name.toLowerCase()}.jpg`);
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
