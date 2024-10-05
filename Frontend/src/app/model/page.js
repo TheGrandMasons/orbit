@@ -12,6 +12,9 @@ import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import { AchievementButton } from './AchievementButton';
+import { ACHIEVEMENTS } from './Achievements';
+import { achievementManager } from './AchievementManager';
 
 // const useTexturePath = () => {
 //   const [texturePath, setTexturePath] = useState(() => {
@@ -26,7 +29,7 @@ import {
 // };
 
 export default function SolarSystemScene() {
-  const texturePath = "/orbit";
+  const texturePath = "";
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -49,8 +52,9 @@ export default function SolarSystemScene() {
   const [uiOrbitalSpeedMultiplier, setUiOrbitalSpeedMultiplier] = useState(16);
   const [uiDistanceScale, setUiDistanceScale] = useState(0.01);
   const [uiSelectedBody, setUiSelectedBody] = useState(null);
-
+  const [unlockedAchievements, setUnlockedAchievements] = useState([]);
   const composerRef = useRef(null);
+
 
   useEffect(() => {
     const currentMount = mountRef.current;
@@ -415,6 +419,10 @@ export default function SolarSystemScene() {
     setUiSelectedBody(bodyData.name);
     updateOrbitVisibility(bodyData);
     centerCameraOnBody(bodyData);
+    
+    if (bodyData) {
+      achievementManager.checkBodyVisited(bodyData.name);
+    }
   }
 
   function onMouseMove(event) {
@@ -703,6 +711,20 @@ export default function SolarSystemScene() {
     setIsMenuOpen((prev) => !prev);
   };
 
+
+  useEffect(() => {
+    // Load achievements on mount
+    achievementManager.loadUnlockedAchievements();
+    setUnlockedAchievements(achievementManager.unlockedAchievements);
+
+    // Subscribe to achievement updates
+    const unsubscribe = achievementManager.addListener(() => {
+      setUnlockedAchievements([...achievementManager.unlockedAchievements]);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <div>
       <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
@@ -783,6 +805,13 @@ export default function SolarSystemScene() {
           path={texturePath}
         />
       )}
+
+      <AchievementButton
+        unlockedAchievements={unlockedAchievements}
+        achievements={ACHIEVEMENTS}
+      />    
+      
+
     </div>
   );
 }
