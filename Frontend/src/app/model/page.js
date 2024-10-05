@@ -7,14 +7,15 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 import { gsap } from "gsap";
 import celestialBodies from "./celestialBodies.js";
+import smallBodies from "./smallBodies.js";
 import LeftPanel from "./LeftPanel.js";
 import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
-import { AchievementButton } from './AchievementButton';
-import { ACHIEVEMENTS } from './Achievements';
-import { achievementManager } from './AchievementManager';
+import { AchievementButton } from "./AchievementButton";
+import { ACHIEVEMENTS } from "./Achievements";
+import { achievementManager } from "./AchievementManager";
 
 // const useTexturePath = () => {
 //   const [texturePath, setTexturePath] = useState(() => {
@@ -30,6 +31,7 @@ import { achievementManager } from './AchievementManager';
 
 export default function SolarSystemScene() {
   const texturePath = "/orbit";
+  // const texturePath = "/";
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -54,7 +56,6 @@ export default function SolarSystemScene() {
   const [uiSelectedBody, setUiSelectedBody] = useState(null);
   const [unlockedAchievements, setUnlockedAchievements] = useState([]);
   const composerRef = useRef(null);
-
 
   useEffect(() => {
     const currentMount = mountRef.current;
@@ -112,6 +113,7 @@ export default function SolarSystemScene() {
 
     addSkybox();
     createCelestialBodies();
+    createAsteroids();
 
     camera.position.set(0, 200, 200);
     controls.update();
@@ -159,7 +161,52 @@ export default function SolarSystemScene() {
     ]);
     sceneRef.current.background = texture;
   }
+  function createAsteroids() {
+    const asteroidGroup = new THREE.Group();
 
+    smallBodies.forEach((data) => {
+      const geometry = new THREE.SphereGeometry(data.radius, 32, 32);
+      const material = new THREE.MeshStandardMaterial({
+        color: data.color,
+        roughness: 0.8,
+        metalness: 0.2,
+      });
+      const asteroid = new THREE.Mesh(geometry, material);
+
+      // Calculate initial position
+      const initialPosition = calculateOrbitPosition(data, data.epoch);
+      asteroid.position.copy(initialPosition);
+
+      // Add asteroid to the group
+      asteroidGroup.add(asteroid);
+
+      // Store asteroid data for animation
+      asteroid.userData = {
+        orbitData: data,
+        initialEpoch: data.epoch,
+      };
+    });
+
+    // Add the asteroid group to the scene
+    sceneRef.current.add(asteroidGroup);
+
+    // Return the updateAsteroidPositions function
+    return (elapsedTime) => {
+      asteroidGroup.children.forEach((asteroid) => {
+        const { orbitData, initialEpoch } = asteroid.userData;
+        const newPosition = calculateOrbitPosition(
+          orbitData,
+          initialEpoch + elapsedTime
+        );
+        asteroid.position.copy(newPosition);
+      });
+    };
+  }
+
+  // Helper function to calculate orbit position (reuse from your existing code)
+  function calculateOrbitPosition(body, t) {
+    // ... (use your existing implementation)
+  }
   function createCelestialBodies() {
     const bodyMap = new Map();
     celestialBodies.forEach((data) => {
@@ -419,7 +466,7 @@ export default function SolarSystemScene() {
     setUiSelectedBody(bodyData.name);
     updateOrbitVisibility(bodyData);
     centerCameraOnBody(bodyData);
-    
+
     if (bodyData) {
       achievementManager.checkBodyVisited(bodyData.name);
     }
@@ -711,7 +758,6 @@ export default function SolarSystemScene() {
     setIsMenuOpen((prev) => !prev);
   };
 
-
   useEffect(() => {
     // Load achievements on mount
     achievementManager.loadUnlockedAchievements();
@@ -809,9 +855,7 @@ export default function SolarSystemScene() {
       <AchievementButton
         unlockedAchievements={unlockedAchievements}
         achievements={ACHIEVEMENTS}
-      />    
-
-
+      />
     </div>
   );
 }
